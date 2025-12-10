@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Dashboard</title>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo">M+</div>
+
+            <button class="side-btn active"><i class="ph-fill ph-heartbeat"></i></button>
+            <button class="side-btn"><i class="ph ph-chat-circle-dots"></i></button>
+            <button class="side-btn"><i class="ph ph-file-text"></i></button>
+            <button class="side-btn"><i class="ph ph-user"></i></button>
+            <button class="side-btn"><i class="ph ph-squares-four"></i></button>
+        </div>
+
+        <button class="side-btn logout"><i class="ph ph-power"></i></button>
+    </aside>
+
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main">
+
+        <!-- HEADER ROW -->
+        <header class="header-row">
+
+            <div class="header-left">
+                <div class="toggles">
+                    <div class="toggle">Diagnose</div>
+                    <div class="toggle active"><div class="dot"></div> My Heart</div>
+                </div>
+
+                <div class="title-block">
+                    <h2 class="subtitle">Hi Dhivakaran,</h2>
+                    <h1 class="title">Overview <span>Conditions</span></h1>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="search-box">
+                    <span>Search for patients...</span>
+                    <i class="ph ph-magnifying-glass"></i>
+                </div>
+
+                <button class="icon-btn primary"><i class="ph-fill ph-phone-call"></i></button>
+                <button class="icon-btn"><i class="ph ph-bell"></i></button>
+
+                <div class="avatar">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80">
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- MAIN GRID LAYOUT (Heart + Stats + Side Panel) -->
+        <section class="content-grid">
+
+            <!-- HEART STAGE (Left Big Section) -->
+            <div class="heart-stage">
+                <div class="heart-ring"></div>
+                <div class="heart-scan"></div>
+                <div id="heart-3d"></div>
+
+                <!-- Floating LIVE card -->
+                <div class="live-floating-card">
+                    <div class="live-badge">
+                        <div class="live-dot"></div> LIVE
+                    </div>
+
+                    <div class="live-bpm">120 <span>bpm</span></div>
+
+                    <svg class="ecg-svg" viewBox="0 0 100 30">
+                        <path id="ecg-path"></path>
+                    </svg>
+                </div>
+            </div>
+
+
+            <!-- STATS GRID (Middle Section) -->
+            <div class="stats-section">
+                <div class="section-label">
+                    <div class="blue-dot"></div> My Heart Condition
+                </div>
+
+                <div class="stats-grid">
+
+                    <!-- CARD 1 -->
+                    <div class="stat-card">
+                        <div class="card-top">
+                            <div class="card-info">
+                                <span class="card-title">Blood Status</span>
+                                <span class="card-value">116/70</span>
+                            </div>
+                            <i class="ph-fill ph-drop card-icon"></i>
+                        </div>
+
+                        <div class="bars">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                            <div class="bar active"></div><div class="bar active"></div><div class="bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2 (Active Blue) -->
+                    <div class="stat-card highlight">
+                        <div class="card-top">
+                            <div class="card-info">
+                                <span class="card-title">Heart Rate</span>
+                                <span class="card-value big">120 <span>bpm</span></span>
+                            </div>
+                            <i class="ph ph-heartbeat card-icon white"></i>
+                        </div>
+
+                        <svg class="mini-wave" viewBox="0 0 100 40">
+                            <path d="M0,25 Q10,25 15,10 T30,25 T45,40 T60,10 T75,25 T100,25"></path>
+                        </svg>
+
+                        <div class="corner-box">
+                            <span>120</span>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3 -->
+                    <div class="stat-card">
+                        <div class="card-top">
+                            <div class="card-info">
+                                <span class="card-title">Blood Count</span>
+                                <span class="card-value">80-90</span>
+                            </div>
+                            <i class="ph-fill ph-chart-bar card-icon"></i>
+                        </div>
+
+                        <svg class="mini-line" viewBox="0 0 100 30">
+                            <path d="M0,20 Q25,5 50,20 T100,20"></path>
+                        </svg>
+                    </div>
+
+                    <!-- CARD 4 -->
+                    <div class="stat-card">
+                        <div class="card-top">
+                            <div class="card-info">
+                                <span class="card-title">Glucose Level</span>
+                                <span class="card-value">230 <small>/ml</small></span>
+                            </div>
+                            <i class="ph-fill ph-dna card-icon"></i>
+                        </div>
+
+                        <svg class="mini-line" viewBox="0 0 100 30">
+                            <path d="M0,20 L10,25 L20,15 L30,25 L40,15 L50,25 L60,15 L100,20"></path>
+                        </svg>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- RIGHT SIDEBAR PANEL (Schedule) -->
+            <div class="schedule-panel">
+                <div class="section-label">
+                    <div class="blue-dot"></div> My Schedule
+                </div>
+
+                <div class="next-checkup">
+                    <div class="nc-left">
+                        <span class="nc-label">NEXT CHECKUP</span>
+                        <span class="nc-date">Fri, 24 Mar</span>
+                    </div>
+                    <i class="ph-fill ph-calendar-check nc-icon"></i>
+                </div>
+
+                <div class="date-switcher">
+                    <button class="arrow"><i class="ph-bold ph-caret-left"></i></button>
+                    <span class="date-text">20 March 2023</span>
+                    <button class="arrow"><i class="ph-bold ph-caret-right"></i></button>
+                </div>
+
+                <div class="doctor-list">
+                    <div class="doctor">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg">
+                        <div class="doc-info">
+                            <span class="doc-name">Dr. Hanzer Jon</span>
+                            <span class="doc-role">Cardiologist</span>
+                        </div>
+                    </div>
+
+                    <div class="doctor">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg">
+                        <div class="doc-info">
+                            <span class="doc-name">Dr. Steve Alex</span>
+                            <span class="doc-role">Surgeon</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="consult-btn">Consult Now <i class="ph-bold ph-arrow-right"></i></button>
+
+            </div>
+
+        </section>
+
+
+        <!-- BOTTOM ORGAN RAIL -->
+        <section class="bottom-rail">
+
+            <div class="section-label rail-label">
+                <div class="blue-dot"></div> My Body Condition
+            </div>
+
+            <div class="organ-item">
+                <svg class="organ-icon" viewBox="0 0 24 24">
+                    <path d="M8.5,7 C6,6 3,7 3,10 C3,14 7,16 12,18 C16,17 19,13 19,9 C19,7 16,6 13,7 C12,5 10,6 8.5,7 Z"></path>
+                </svg>
+            </div>
+
+            <div class="organ-item selected">
+                <i class="ph ph-heart"></i>
+                <div class="organ-label">My Heart</div>
+                <div class="organ-arrow"><i class="ph-bold ph-arrow-up-right"></i></div>
+            </div>
+
+            <div class="organ-item"><i class="ph ph-dna"></i></div>
+            <div class="organ-item"><i class="ph ph-brain"></i></div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
