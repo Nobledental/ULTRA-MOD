@@ -3,245 +3,1409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Dashboard</title>
-
+    <title>Health flo OS - NEO (Bio-Sync Enabled)</title>
+    
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        :root {
+            /* Theme Variables */
+            --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+            
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(24px);
+            
+            --text-white: #ffffff;
+            --text-muted: #94a3b8;
 
-    <link rel="stylesheet" href="styles.css">
+            /* Status Colors */
+            --color-blue: #0A84FF;
+            --color-yellow: #f59e0b;
+            --color-red: #ef4444;
+            
+            --accent-blue: #2563eb;
+            --card-bg: rgba(22, 28, 38, 0.6);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --card-active-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+        }
+
+        /* RESET */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { display: none; }
+        body {
+            height: 100vh; width: 100vw;
+            background: var(--bg-radial);
+            overflow: hidden; user-select: none;
+            color: white;
+        }
+
+        /* LAYOUT CONTAINER */
+        .app-container {
+            width: 100vw; height: 100vh;
+            background: transparent;
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
+        }
+
+        /* BROWSER BAR */
+        .browser-bar {
+            height: 60px; display: flex; align-items: center; padding: 0 32px; gap: 24px;
+            border-bottom: 1px solid var(--glass-border); 
+            background: rgba(0,0,0,0.2); 
+            backdrop-filter: blur(10px);
+            z-index: 20;
+            flex-shrink: 0;
+        }
+        .window-controls { display: flex; gap: 8px; margin-right: 12px; }
+        .window-dot { width: 12px; height: 12px; border-radius: 50%; opacity: 0.8; }
+        .branding-right { margin-left: auto; font-weight: 700; color: white; letter-spacing: 1px; font-size: 14px; opacity: 0.8; display: flex; align-items: center; gap: 10px; }
+        .branding-right span { color: var(--color-blue); }
+
+        /* DASHBOARD BODY */
+        .dashboard-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 90px; display: flex; flex-direction: column; align-items: center; padding: 40px 0; gap: 36px;
+            border-right: 1px solid var(--glass-border); 
+            z-index: 10; 
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: var(--glass-blur);
+            flex-shrink: 0;
+        }
+        .logo { font-weight: 800; color: white; font-size: 24px; letter-spacing: -1px; margin-bottom: 12px; }
+        .logo span { color: var(--color-blue); }
+        .menu-item {
+            width: 50px; height: 50px; border-radius: 16px; display: flex; justify-content: center; align-items: center;
+            color: var(--text-muted); font-size: 22px; cursor: pointer; transition: 0.3s; border: 1px solid transparent;
+        }
+        .menu-item:hover { color: white; background: rgba(255,255,255,0.05); }
+        .menu-item.active { 
+            background: rgba(255, 255, 255, 0.08); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* MAIN GRID */
+        .main-content {
+            flex: 1; padding: 30px 40px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 340px; 
+            grid-template-rows: auto 1fr 140px;
+            gap: 30px; overflow-y: auto; position: relative;
+        }
+
+        /* HEADER */
+        .header-section {
+            grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 10px; z-index: 5;
+        }
+        .header-left { display: flex; flex-direction: column; gap: 15px; }
+        .top-toggles { display: flex; gap: 10px; }
+        .toggle-pill {
+            padding: 8px 24px; border-radius: 100px; font-size: 13px; font-weight: 500;
+            color: var(--text-muted); background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .toggle-pill.active {
+            background: rgba(10, 132, 255, 0.2); color: white; border-color: rgba(10, 132, 255, 0.4);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .active-dot { width: 6px; height: 6px; background: var(--color-blue); border-radius: 50%; box-shadow: 0 0 10px var(--color-blue); }
+
+        .page-title h2 { font-size: 18px; color: var(--color-blue); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; }
+        .page-title h1 { font-size: 56px; font-weight: 700; color: white; line-height: 1; letter-spacing: -2px; }
+        .page-title h1 span { font-weight: 300; opacity: 0.8; }
+
+        /* 3D STAGE */
+        .heart-stage {
+            grid-column: 1; grid-row: 2; position: relative;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #model-3d-container { 
+            width: 140%; height: 140%; position: absolute; top: -20%; left: -20%; z-index: 1; 
+            opacity: 0; animation: fadeIn 1.5s ease-out forwards; cursor: grab;
+        }
+        #model-3d-container:active { cursor: grabbing; }
+
+        .rings {
+            position: absolute; width: 600px; height: 600px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.05); background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
+            z-index: 0; animation: spin 60s linear infinite;
+        }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--color-blue), transparent);
+            box-shadow: 0 0 15px var(--color-blue);
+            animation: scan-down 4s ease-in-out infinite; z-index: 2; opacity: 0.5;
+        }
+        @keyframes scan-down { 0% { top: 10%; opacity: 0; } 50% { opacity: 0.8; } 100% { top: 90%; opacity: 0; } }
+
+        .floating-stat {
+            position: absolute; bottom: 40px; left: 20px;
+            background: rgba(20, 25, 35, 0.4); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+            padding: 16px 20px; width: 200px; z-index: 10;
+        }
+        .live-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+        .live-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .hotspot-dot {
+            position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.2); z-index: 5; cursor: pointer;
+            transition: 0.3s;
+        }
+        .hotspot-dot:hover { transform: scale(1.2); background: var(--color-blue); }
+
+        /* STATS GRID */
+        .stats-area { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; z-index: 5; }
+        .section-header { font-size: 13px; font-weight: 700; color: var(--color-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .blue-dot { width: 6px; height: 6px; background: var(--color-blue); border-radius: 50%; box-shadow: 0 0 8px var(--color-blue); }
+
+        .cards-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; flex: 1; }
+        
+        .data-card {
+            background: var(--card-bg); 
+            backdrop-filter: blur(18px);
+            border-radius: 24px; padding: 24px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            border: 1px solid var(--card-border); position: relative; overflow: hidden; transition: 0.3s;
+        }
+        
+        .data-card:hover { border-color: rgba(255,255,255,0.1); background: rgba(30, 35, 45, 0.8); }
+
+        /* DYNAMIC CARD COLORS */
+        .data-card.state-blue .card-icon { color: var(--color-blue); }
+        .data-card.active-blue {
+            background: var(--card-active-bg); 
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 50px -20px rgba(30, 58, 138, 0.4);
+        }
+        .data-card.state-yellow {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+        .data-card.state-yellow .card-icon { color: var(--color-yellow); }
+        
+        .data-card.state-red {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+        .data-card.state-red .card-icon { color: var(--color-red); }
+
+        .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; z-index: 2; }
+        .card-icon { font-size: 20px; transition: color 0.3s; }
+        .card-title { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 500; }
+        .card-val { font-size: 26px; font-weight: 700; color: white; letter-spacing: -0.5px; transition: 0.3s; }
+        
+        .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 45px; margin-top: auto; z-index: 2; }
+        .bar { flex: 1; background: rgba(255,255,255,0.1); border-radius: 4px; transition: height 0.5s ease-in-out, background 0.3s; }
+        .bar.act { background: currentColor; }
+        
+        .blue-square-val {
+            position: absolute; right: 24px; bottom: 24px; width: 50px; height: 50px;
+            background: var(--accent-blue); border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4); z-index: 2;
+        }
+
+        /* SCHEDULE AREA */
+        .schedule-area {
+            grid-column: 3; grid-row: 2 / 4;
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(24px);
+            border-radius: 28px; padding: 24px;
+            border: 1px solid var(--glass-border); display: flex; flex-direction: column; z-index: 5;
+        }
+        .ai-panel {
+            margin-top: 20px; padding: 16px; background: rgba(10, 132, 255, 0.08); 
+            border-radius: 16px; border: 1px solid rgba(10, 132, 255, 0.2); transition: 0.3s;
+        }
+        .ai-panel.warn { background: rgba(239, 68, 68, 0.1); border-color: var(--color-red); }
+        .ai-title { font-size: 11px; font-weight: 800; color: var(--color-blue); margin-bottom: 6px; display: block; letter-spacing: 1px; }
+        .ai-text { font-size: 12px; line-height: 1.5; color: #cbd5e1; }
+
+        .next-checkup {
+            background: rgba(255,255,255,0.03); border-radius: 16px; padding: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px; color: white; border: 1px solid rgba(255,255,255,0.03);
+        }
+        .date-nav {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+            background: rgba(0,0,0,0.2); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.03);
+        }
+        .nav-arrow { 
+            width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.05); 
+            display: flex; justify-content: center; align-items: center; font-size: 14px; color: #9ca3af; cursor: pointer; transition: 0.2s;
+        }
+        .doc-list { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; }
+        .doc-row { 
+            display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 16px; 
+            transition: 0.2s; cursor: pointer; border: 1px solid transparent;
+        }
+        .doc-row:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.04); }
+        .doc-img { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; }
+        .consult-btn {
+            margin-top: 24px; background: linear-gradient(135deg, #0A84FF, #006CFF); color: white; border: none; padding: 14px;
+            border-radius: 100px; font-weight: 700; font-size: 13px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px -5px rgba(10, 132, 255, 0.4); transition: 0.3s;
+        }
+
+        /* BOTTOM RAIL */
+        .bottom-rail {
+            grid-column: 1 / 3; grid-row: 3;
+            display: flex; gap: 20px; align-items: center;
+            z-index: 5;
+            overflow-x: auto; /* Allow scrolling for many organs */
+            padding-bottom: 5px;
+        }
+        .organ-item {
+            width: 130px; height: 130px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            border-radius: 24px; display: flex; justify-content: center; align-items: center;
+            position: relative; cursor: pointer; transition: 0.3s;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .organ-item:hover { background: rgba(255,255,255,0.07); transform: translateY(-4px); }
+        
+        .organ-icon { width: 50px; height: 50px; fill: none; stroke: var(--text-muted); stroke-width: 1.5; transition: 0.3s; }
+        .organ-item i { font-size: 48px; color: var(--text-muted); transition: 0.3s; }
+
+        .organ-item.selected {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--color-blue);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+        }
+        .organ-item.selected .organ-icon, .organ-item.selected i {
+            stroke: var(--color-blue); color: var(--color-blue); filter: drop-shadow(0 0 10px rgba(10, 132, 255, 0.5)); transform: scale(1.1);
+        }
+        
+        .organ-label {
+            position: absolute; bottom: 12px; left: 12px;
+            background: #ffffff; color: #000; font-size: 10px; font-weight: 800;
+            padding: 5px 12px; border-radius: 100px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .arrow-box {
+            position: absolute; bottom: 12px; right: 12px;
+            width: 28px; height: 28px; background: var(--color-blue); border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; color: white; font-size: 12px;
+            box-shadow: 0 5px 15px rgba(10, 132, 255, 0.4); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s backwards;
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Sound Button */
+        .sound-btn {
+            position: absolute; top: 20px; left: 20px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 100; color: white;
+        }
+
+        /* --- RESPONSIVE OPTIMIZATION --- */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+                padding: 20px;
+                overflow-y: scroll;
+            }
+            .heart-stage { grid-row: 2; height: 400px; }
+            .stats-area { grid-row: 3; grid-column: 1; }
+            .schedule-area { grid-row: 4; grid-column: 1; }
+            .bottom-rail { grid-row: 5; grid-column: 1; overflow-x: auto; padding-bottom: 20px; }
+            .sidebar { display: none; } /* Hide sidebar on smaller desktop/tablet */
+            .logo { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .browser-bar { padding: 0 16px; }
+            .url-bar { display: none; } /* Simplify header */
+            .main-content { padding: 16px; gap: 20px; }
+            .page-title h1 { font-size: 32px; }
+            .heart-stage { height: 350px; }
+            .cards-grid { grid-template-columns: 1fr; } /* Stack cards */
+            .bottom-rail { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
+            .organ-item { min-width: 120px; }
+            
+            /* Add Mobile Bottom Nav Simulation */
+            .app-container::after {
+                content: 'MENU'; 
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
+                background: #0E121B; border-top: 1px solid rgba(255,255,255,0.1);
+                display: flex; justify-content: space-around; align-items: center;
+                font-size: 10px; color: #94a3b8; z-index: 1000; pointer-events: none; opacity: 0.8;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="app-wrapper">
-
-    <!-- LEFT SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-top">
-            <div class="logo">M+</div>
-
-            <button class="side-btn active"><i class="ph-fill ph-heartbeat"></i></button>
-            <button class="side-btn"><i class="ph ph-chat-circle-dots"></i></button>
-            <button class="side-btn"><i class="ph ph-file-text"></i></button>
-            <button class="side-btn"><i class="ph ph-user"></i></button>
-            <button class="side-btn"><i class="ph ph-squares-four"></i></button>
+    <div class="app-container">
+        <!-- Browser Bar -->
+        <div class="browser-bar">
+            <div class="window-controls">
+                <div class="window-dot" style="background: #ef4444;"></div>
+                <div class="window-dot" style="background: #f59e0b;"></div>
+                <div class="window-dot" style="background: #10b981;"></div>
+            </div>
+            <div class="nav-icons"><i class="ph ph-caret-left"></i><i class="ph ph-caret-right"></i></div>
+            <div class="url-bar"><i class="ph-fill ph-lock-key"></i><span>Healthflo.com</span><i class="ph ph-arrow-clockwise" style="margin-left: auto;"></i></div>
+            <div class="branding-right">Health flo <span>OS</span></div>
         </div>
 
-        <button class="side-btn logout"><i class="ph ph-power"></i></button>
-    </aside>
-
-
-    <!-- MAIN CONTENT AREA -->
-    <main class="main">
-
-        <!-- HEADER ROW -->
-        <header class="header-row">
-
-            <div class="header-left">
-                <div class="toggles">
-                    <div class="toggle">Diagnose</div>
-                    <div class="toggle active"><div class="dot"></div> My Heart</div>
-                </div>
-
-                <div class="title-block">
-                    <h2 class="subtitle">Hi Dhivakaran,</h2>
-                    <h1 class="title">Overview <span>Conditions</span></h1>
-                </div>
+        <div class="dashboard-body">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="logo">H<span>+</span></div>
+                <div class="menu-item active"><i class="ph-fill ph-heartbeat"></i></div>
+                <div class="menu-item"><i class="ph ph-chat-circle-dots"></i></div>
+                <div class="menu-item"><i class="ph ph-file-text"></i></div>
+                <div class="menu-item"><i class="ph ph-user"></i></div>
+                <div class="menu-item"><i class="ph ph-squares-four"></i></div>
+                <div class="menu-item" style="margin-top: auto; color: #ef4444;"><i class="ph ph-power"></i></div>
             </div>
 
-            <div class="header-right">
-                <div class="search-box">
-                    <span>Search for patients...</span>
-                    <i class="ph ph-magnifying-glass"></i>
-                </div>
-
-                <button class="icon-btn primary"><i class="ph-fill ph-phone-call"></i></button>
-                <button class="icon-btn"><i class="ph ph-bell"></i></button>
-
-                <div class="avatar">
-                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80">
-                </div>
-            </div>
-
-        </header>
-
-
-        <!-- MAIN GRID LAYOUT (Heart + Stats + Side Panel) -->
-        <section class="content-grid">
-
-            <!-- HEART STAGE (Left Big Section) -->
-            <div class="heart-stage">
-                <div class="heart-ring"></div>
-                <div class="heart-scan"></div>
-                <div id="heart-3d"></div>
-
-                <!-- Floating LIVE card -->
-                <div class="live-floating-card">
-                    <div class="live-badge">
-                        <div class="live-dot"></div> LIVE
-                    </div>
-
-                    <div class="live-bpm">120 <span>bpm</span></div>
-
-                    <svg class="ecg-svg" viewBox="0 0 100 30">
-                        <path id="ecg-path"></path>
-                    </svg>
-                </div>
-            </div>
-
-
-            <!-- STATS GRID (Middle Section) -->
-            <div class="stats-section">
-                <div class="section-label">
-                    <div class="blue-dot"></div> My Heart Condition
-                </div>
-
-                <div class="stats-grid">
-
-                    <!-- CARD 1 -->
-                    <div class="stat-card">
-                        <div class="card-top">
-                            <div class="card-info">
-                                <span class="card-title">Blood Status</span>
-                                <span class="card-value">116/70</span>
-                            </div>
-                            <i class="ph-fill ph-drop card-icon"></i>
+            <!-- Content -->
+            <div class="main-content">
+                
+                <!-- Header -->
+                <div class="header-section">
+                    <div class="header-left">
+                        <div class="top-toggles">
+                            <div class="toggle-pill">Diagnose</div>
+                            <div class="toggle-pill active" id="mode-pill"><div class="active-dot"></div> My Heart</div>
                         </div>
-
-                        <div class="bars">
-                            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                            <div class="bar active"></div><div class="bar active"></div><div class="bar"></div>
+                        <div class="page-title">
+                            <h2>Hi Dhivakaran,</h2>
+                            <h1>Overview <span>Conditions</span></h1>
                         </div>
                     </div>
+                </div>
 
-                    <!-- CARD 2 (Active Blue) -->
-                    <div class="stat-card highlight">
-                        <div class="card-top">
-                            <div class="card-info">
-                                <span class="card-title">Heart Rate</span>
-                                <span class="card-value big">120 <span>bpm</span></span>
-                            </div>
-                            <i class="ph ph-heartbeat card-icon white"></i>
+                <!-- 3D Stage -->
+                <div class="heart-stage">
+                    <div class="sound-btn" id="sound-toggle"><i class="ph-fill ph-speaker-simple-high"></i></div>
+                    <div class="rings"></div>
+                    <div class="scanner-line"></div>
+                    <div id="model-3d-container"></div>
+                    
+                    <div class="floating-stat" id="float-card">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                            <div class="live-badge"><div class="live-dot"></div> LIVE</div>
                         </div>
-
-                        <svg class="mini-wave" viewBox="0 0 100 40">
-                            <path d="M0,25 Q10,25 15,10 T30,25 T45,40 T60,10 T75,25 T100,25"></path>
-                        </svg>
-
-                        <div class="corner-box">
-                            <span>120</span>
-                        </div>
-                    </div>
-
-                    <!-- CARD 3 -->
-                    <div class="stat-card">
-                        <div class="card-top">
-                            <div class="card-info">
-                                <span class="card-title">Blood Count</span>
-                                <span class="card-value">80-90</span>
-                            </div>
-                            <i class="ph-fill ph-chart-bar card-icon"></i>
-                        </div>
-
-                        <svg class="mini-line" viewBox="0 0 100 30">
-                            <path d="M0,20 Q25,5 50,20 T100,20"></path>
+                        <div style="font-size:24px; font-weight:800; color:white; margin-bottom:4px;" id="main-stat">120 <span style="font-size:12px; font-weight:500;">bpm</span></div>
+                        <svg width="100%" height="30" viewBox="0 0 100 30" id="live-ecg-svg">
+                            <path id="live-ecg-path" d="M0,15 L10,15 L15,5 L20,25 L25,10 L30,20 L40,15 L50,15 L55,5 L60,25 L65,10 L70,20 L80,15 L100,15" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
+                </div>
 
-                    <!-- CARD 4 -->
-                    <div class="stat-card">
-                        <div class="card-top">
-                            <div class="card-info">
-                                <span class="card-title">Glucose Level</span>
-                                <span class="card-value">230 <small>/ml</small></span>
+                <!-- Stats Grid -->
+                <div class="stats-area">
+                    <div class="section-header"><div class="blue-dot"></div> <span id="section-title">My Heart Condition</span></div>
+                    <div class="cards-grid">
+                        <!-- Card 1 -->
+                        <div class="data-card state-blue" id="card-1">
+                            <div class="card-head">
+                                <div><span class="card-title" id="c1-title">Blood Status</span><span class="card-val" id="c1-val">116/70</span></div>
+                                <i class="ph-fill ph-drop card-icon" id="c1-icon"></i>
                             </div>
-                            <i class="ph-fill ph-dna card-icon"></i>
+                            <div class="bar-chart" id="blood-chart">
+                                <div class="bar" style="height:40%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:50%"></div><div class="bar act" style="height:90%"></div><div class="bar act" style="height:60%"></div><div class="bar" style="height:40%"></div>
+                            </div>
                         </div>
+                        <!-- Card 2 -->
+                        <div class="data-card active-blue" id="card-2">
+                            <div class="card-head">
+                                <div><span class="card-title" id="c2-title">Heart Rate</span><span class="card-val" id="c2-val">120 <span style="font-size:14px; font-weight:500;">bpm</span></span></div>
+                                <i class="ph ph-heartbeat card-icon" style="color:white;" id="c2-icon"></i>
+                            </div>
+                            <svg width="100%" height="50" style="margin-top:auto; opacity:0.8; overflow:visible;"><path id="card-wave-path" d="M0,25 Q10,25 15,10 T30,25 T45,40 T60,10 T75,25 T100,25" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/></svg>
+                            <div class="blue-square-val"><span style="font-size:16px; font-weight:800;" id="box-bpm">120</span></div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="data-card state-blue" id="card-3">
+                            <div class="card-head">
+                                <div><span class="card-title" id="c3-title">Blood Count</span><span class="card-val" id="c3-val">80-90</span></div>
+                                <i class="ph-fill ph-chart-bar card-icon" id="c3-icon"></i>
+                            </div>
+                            <svg width="100%" height="40" style="margin-top:auto;"><path d="M0,20 Q25,5 50,20 T100,20" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round"/><circle cx="80" cy="20" r="4" fill="#3b82f6" /></svg>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="data-card state-blue" id="card-4">
+                            <div class="card-head">
+                                <div><span class="card-title" id="c4-title">Glucose Level</span><span class="card-val" id="c4-val">230<small style="font-size:12px; color:#6b7280;">/ml</small></span></div>
+                                <i class="ph-fill ph-dna card-icon" id="c4-icon"></i>
+                            </div>
+                            <svg width="100%" height="40" style="margin-top:auto;"><path d="M0,20 L10,25 L20,15 L30,25 L40,15 L50,25 L60,15 L100,20" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                        </div>
+                    </div>
+                </div>
 
-                        <svg class="mini-line" viewBox="0 0 100 30">
-                            <path d="M0,20 L10,25 L20,15 L30,25 L40,15 L50,25 L60,15 L100,20"></path>
+                <!-- Schedule / AI Analysis -->
+                <div class="schedule-area">
+                    <div class="section-header"><div class="blue-dot"></div> My Schedule</div>
+                    
+                    <!-- AI Suggestion Box (Dynamic) -->
+                    <div class="ai-panel" id="ai-panel">
+                        <span class="ai-title" id="ai-title">AI ANALYSIS</span>
+                        <p class="ai-text" id="ai-text">Patient vitals are stable. All organ functions within normal range. Monitoring active.</p>
+                    </div>
+
+                    <div class="next-checkup" style="margin-top: 20px;">
+                        <div><div style="font-size:11px; color:#9ca3af; margin-bottom:4px; font-weight: 600;">NEXT CHECKUP</div><div style="font-weight:700; font-size: 15px;">Fri, 24 Mar</div></div>
+                        <i class="ph-fill ph-calendar-check" style="font-size:24px; color: var(--color-blue);"></i>
+                    </div>
+                    <div class="date-nav">
+                        <div class="nav-arrow"><i class="ph-bold ph-caret-left"></i></div><span style="font-size:13px; color:white; font-weight:600;">20 March 2023</span><div class="nav-arrow"><i class="ph-bold ph-caret-right"></i></div>
+                    </div>
+                    <div class="doc-list">
+                        <div class="doc-row"><img src="https://randomuser.me/api/portraits/men/32.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Hanzer Jon</div><div style="font-size:11px; color:#9ca3af;">Cardiologist</div></div></div>
+                        <div class="doc-row"><img src="https://randomuser.me/api/portraits/men/45.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Steve Alex</div><div style="font-size:11px; color:#9ca3af;">Surgeon</div></div></div>
+                    </div>
+                    <button class="consult-btn">Consult Now <i class="ph-bold ph-arrow-right"></i></button>
+                </div>
+
+                <!-- Bottom Rail -->
+                <div class="bottom-rail">
+                    <div class="section-header" style="position: absolute; top:-25px;"><div class="blue-dot"></div> My Body Condition</div>
+                    
+                    <div class="organ-item" data-organ="liver">
+                        <svg class="organ-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8.5,7 C6,6 3,7 3,10 C3,14 7,16 12,18 C16,17 19,13 19,9 C19,7 16,6 13,7 C12,5 10,6 8.5,7 Z" />
                         </svg>
                     </div>
 
-                </div>
-            </div>
-
-
-            <!-- RIGHT SIDEBAR PANEL (Schedule) -->
-            <div class="schedule-panel">
-                <div class="section-label">
-                    <div class="blue-dot"></div> My Schedule
-                </div>
-
-                <div class="next-checkup">
-                    <div class="nc-left">
-                        <span class="nc-label">NEXT CHECKUP</span>
-                        <span class="nc-date">Fri, 24 Mar</span>
-                    </div>
-                    <i class="ph-fill ph-calendar-check nc-icon"></i>
-                </div>
-
-                <div class="date-switcher">
-                    <button class="arrow"><i class="ph-bold ph-caret-left"></i></button>
-                    <span class="date-text">20 March 2023</span>
-                    <button class="arrow"><i class="ph-bold ph-caret-right"></i></button>
-                </div>
-
-                <div class="doctor-list">
-                    <div class="doctor">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg">
-                        <div class="doc-info">
-                            <span class="doc-name">Dr. Hanzer Jon</span>
-                            <span class="doc-role">Cardiologist</span>
-                        </div>
+                    <div class="organ-item selected" data-organ="heart">
+                        <i class="ph ph-heart"></i>
+                        <div class="organ-label">My Heart</div>
+                        <div class="arrow-box"><i class="ph-bold ph-arrow-up-right"></i></div>
                     </div>
 
-                    <div class="doctor">
-                        <img src="https://randomuser.me/api/portraits/men/45.jpg">
-                        <div class="doc-info">
-                            <span class="doc-name">Dr. Steve Alex</span>
-                            <span class="doc-role">Surgeon</span>
-                        </div>
+                    <div class="organ-item" data-organ="lungs">
+                        <i class="ph ph-wind"></i>
+                    </div>
+
+                    <div class="organ-item" data-organ="cells">
+                        <i class="ph ph-dna"></i>
+                    </div>
+
+                    <div class="organ-item" data-organ="brain">
+                        <i class="ph ph-brain"></i>
+                    </div>
+
+                    <div class="organ-item" data-organ="kidneys">
+                        <i class="ph ph-egg"></i>
+                    </div>
+
+                    <div class="organ-item" data-organ="stomach">
+                        <i class="ph ph-flask"></i>
+                    </div>
+
+                    <div class="organ-item" data-organ="intestines">
+                        <i class="ph ph-waves"></i>
+                    </div>
+
+                    <!-- New Organs -->
+                    <div class="organ-item" data-organ="eyes">
+                        <i class="ph ph-eye"></i>
+                    </div>
+                    <div class="organ-item" data-organ="pancreas">
+                        <i class="ph ph-cookie"></i>
+                    </div>
+                    <div class="organ-item" data-organ="gallbladder">
+                        <i class="ph ph-drop-half"></i>
+                    </div>
+                    <div class="organ-item" data-organ="urinary">
+                        <i class="ph ph-drop"></i>
+                    </div>
+                    <div class="organ-item" data-organ="skeletal">
+                        <i class="ph ph-skull"></i>
+                    </div>
+                    <div class="organ-item" data-organ="immune">
+                        <i class="ph ph-shield-check"></i>
+                    </div>
+                    <div class="organ-item" data-organ="dental">
+                        <i class="ph ph-smiley"></i>
+                    </div>
+                    <div class="organ-item" data-organ="breast">
+                        <i class="ph ph-gender-female"></i>
+                    </div>
+                    <div class="organ-item" data-organ="ligaments">
+                        <i class="ph ph-link"></i>
                     </div>
                 </div>
 
-                <button class="consult-btn">Consult Now <i class="ph-bold ph-arrow-right"></i></button>
-
             </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- DATA STORE ---
+        const ORGAN_DATA = {
+            heart: {
+                title: "My Heart Condition",
+                mainStat: "BPM",
+                animKey: "bpm", 
+                simValue: 80,
+                stats: [
+                    { id: "c1", title: "Blood Status", base: 116, unit: "/70", icon: "ph-drop", type: "bp" },
+                    { id: "c2", title: "Heart Rate", base: 120, unit: "bpm", icon: "ph-heartbeat", type: "bpm" },
+                    { id: "c3", title: "Blood Count", base: 85, unit: "", icon: "ph-chart-bar", type: "norm" },
+                    { id: "c4", title: "Glucose Level", base: 230, unit: "/ml", icon: "ph-dna", type: "norm" }
+                ],
+                abnormal: { msg: "Arrhythmia Detected. Irregular heart rhythm.", action: "Recommend immediate ECG scan." }
+            },
+            brain: {
+                title: "My Brain Condition",
+                mainStat: "Hz",
+                animKey: "hz",
+                simValue: 14,
+                stats: [
+                    { id: "c1", title: "Brain Waves", base: 14, unit: "Hz", icon: "ph-wave-sine", type: "hz" },
+                    { id: "c2", title: "Stress Level", base: 24, unit: "%", icon: "ph-brain", type: "perc" },
+                    { id: "c3", title: "Oxygenation", base: 98, unit: "%", icon: "ph-wind", type: "perc" },
+                    { id: "c4", title: "ICP", base: 12, unit: "mmHg", icon: "ph-lightning", type: "norm" }
+                ],
+                abnormal: { msg: "High Cortisol Levels.", action: "Suggest mindfulness or neurology consult." }
+            },
+            liver: {
+                title: "My Liver Condition",
+                mainStat: "mg",
+                animKey: "tox",
+                simValue: 5,
+                stats: [
+                    { id: "c1", title: "ALT Enzymes", base: 29, unit: "U/L", icon: "ph-flask", type: "norm" },
+                    { id: "c2", title: "Toxicity", base: 5, unit: "%", icon: "ph-virus", type: "tox" },
+                    { id: "c3", title: "Bilirubin", base: 1.1, unit: "mg", icon: "ph-test-tube", type: "norm" },
+                    { id: "c4", title: "Albumin", base: 4.5, unit: "g", icon: "ph-egg", type: "norm" }
+                ],
+                abnormal: { msg: "Elevated Enzymes.", action: "Check dietary intake and hydration." }
+            },
+            cells: {
+                title: "Cellular Status",
+                mainStat: "Count",
+                animKey: "rep",
+                simValue: 1,
+                stats: [
+                    { id: "c1", title: "WBC Count", base: 6500, unit: "", icon: "ph-shield-check", type: "count" },
+                    { id: "c2", title: "Immunity", base: 95, unit: "%", icon: "ph-shield-plus", type: "perc" },
+                    { id: "c3", title: "RBC Count", base: 5.1, unit: "M", icon: "ph-drop", type: "count" },
+                    { id: "c4", title: "Platelets", base: 250, unit: "k", icon: "ph-first-aid", type: "count" }
+                ],
+                abnormal: { msg: "Low WBC Count.", action: "Monitor temperature and avoid exposure." }
+            },
+            lungs: {
+                title: "My Lung Condition",
+                mainStat: "rpm",
+                animKey: "rpm",
+                simValue: 16,
+                stats: [
+                    { id: "c1", title: "Resp Rate", base: 16, unit: "rpm", icon: "ph-wind", type: "rpm" },
+                    { id: "c2", title: "SpO2", base: 98, unit: "%", icon: "ph-drop", type: "perc" },
+                    { id: "c3", title: "Capacity", base: 4.5, unit: "L", icon: "ph-chart-bar", type: "norm" },
+                    { id: "c4", title: "CO2", base: 25, unit: "mmol", icon: "ph-cloud", type: "norm" }
+                ],
+                abnormal: { msg: "Low Oxygen Saturation.", action: "Deep breathing exercises recommended." }
+            },
+            kidneys: {
+                title: "Kidney Function",
+                mainStat: "GFR",
+                animKey: "gfr",
+                simValue: 90,
+                stats: [
+                    { id: "c1", title: "GFR", base: 90, unit: "mL/min", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "Creatinine", base: 0.9, unit: "mg/dL", icon: "ph-flask", type: "norm" },
+                    { id: "c3", title: "Urea", base: 12, unit: "mg/dL", icon: "ph-test-tube", type: "norm" },
+                    { id: "c4", title: "Electrolytes", base: 100, unit: "%", icon: "ph-lightning", type: "norm" }
+                ],
+                abnormal: { msg: "Reduced Filtration.", action: "Increase hydration." }
+            },
+            stomach: {
+                title: "Gastric Status",
+                mainStat: "pH",
+                animKey: "ph",
+                simValue: 2,
+                stats: [
+                    { id: "c1", title: "Acidity (pH)", base: 2.0, unit: "pH", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "Motility", base: 3, unit: "cpm", icon: "ph-waves", type: "norm" },
+                    { id: "c3", title: "Enzymes", base: 100, unit: "%", icon: "ph-flask", type: "norm" },
+                    { id: "c4", title: "Flora", base: 98, unit: "%", icon: "ph-plant", type: "norm" }
+                ],
+                abnormal: { msg: "High Acidity.", action: "Dietary adjustment required." }
+            },
+            intestines: {
+                title: "Intestinal Health",
+                mainStat: "Motility",
+                animKey: "mot",
+                simValue: 8,
+                stats: [
+                    { id: "c1", title: "Motility", base: 8, unit: "/min", icon: "ph-activity", type: "norm" },
+                    { id: "c2", title: "Absorption", base: 95, unit: "%", icon: "ph-arrows-in", type: "norm" },
+                    { id: "c3", title: "Flora Balance", base: 92, unit: "%", icon: "ph-plant", type: "norm" },
+                    { id: "c4", title: "Hydration", base: 90, unit: "%", icon: "ph-drop", type: "norm" }
+                ],
+                abnormal: { msg: "Irregular Motility.", action: "Probiotics recommended." }
+            },
+            eyes: {
+                title: "Visual Health",
+                mainStat: "IOP",
+                animKey: "iop",
+                simValue: 15,
+                stats: [
+                    { id: "c1", title: "Vision", base: 20, unit: "/20", icon: "ph-eye", type: "norm" },
+                    { id: "c2", title: "IOP", base: 15, unit: "mmHg", icon: "ph-gauge", type: "norm" },
+                    { id: "c3", title: "Pupil React", base: 3, unit: "mm", icon: "ph-circle", type: "norm" },
+                    { id: "c4", title: "Tear Prod", base: 10, unit: "mm", icon: "ph-drop", type: "norm" }
+                ],
+                abnormal: { msg: "Elevated Pressure.", action: "Glaucoma check advised." }
+            },
+            pancreas: {
+                title: "Pancreatic Status",
+                mainStat: "Insulin",
+                animKey: "ins",
+                simValue: 10,
+                stats: [
+                    { id: "c1", title: "Insulin", base: 10, unit: "uIU/mL", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "Amylase", base: 50, unit: "U/L", icon: "ph-flask", type: "norm" },
+                    { id: "c3", title: "Lipase", base: 40, unit: "U/L", icon: "ph-test-tube", type: "norm" },
+                    { id: "c4", title: "Glucose", base: 90, unit: "mg/dL", icon: "ph-cube", type: "norm" }
+                ],
+                abnormal: { msg: "Enzyme Imbalance.", action: "Monitor diet and sugar." }
+            },
+            gallbladder: {
+                title: "Gallbladder",
+                mainStat: "Flow",
+                animKey: "bile",
+                simValue: 98,
+                stats: [
+                    { id: "c1", title: "Bile Flow", base: 100, unit: "%", icon: "ph-waves", type: "norm" },
+                    { id: "c2", title: "Stones", base: 0, unit: "count", icon: "ph-circles-three", type: "norm" },
+                    { id: "c3", title: "Wall Thick", base: 2, unit: "mm", icon: "ph-ruler", type: "norm" },
+                    { id: "c4", title: "Inflammation", base: 0, unit: "%", icon: "ph-fire", type: "norm" }
+                ],
+                abnormal: { msg: "Bile blockage.", action: "Ultrasound recommended." }
+            },
+            urinary: {
+                title: "Urinary System",
+                mainStat: "Output",
+                animKey: "out",
+                simValue: 1500,
+                stats: [
+                    { id: "c1", title: "Daily Output", base: 1500, unit: "mL", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "pH", base: 6.0, unit: "pH", icon: "ph-test-tube", type: "norm" },
+                    { id: "c3", title: "Specific Gravity", base: 1.015, unit: "", icon: "ph-flask", type: "norm" },
+                    { id: "c4", title: "Protein", base: 0, unit: "mg", icon: "ph-prohibit", type: "norm" }
+                ],
+                abnormal: { msg: "Dehydration signs.", action: "Increase water intake." }
+            },
+            skeletal: {
+                title: "Skeletal System",
+                mainStat: "BMD",
+                animKey: "bmd",
+                simValue: 0,
+                stats: [
+                    { id: "c1", title: "Bone Density", base: 0, unit: "T-Score", icon: "ph-chart-bar", type: "norm" },
+                    { id: "c2", title: "Calcium", base: 9.5, unit: "mg/dL", icon: "ph-drop", type: "norm" },
+                    { id: "c3", title: "Vit D", base: 30, unit: "ng/mL", icon: "ph-sun", type: "norm" },
+                    { id: "c4", title: "Joint Mobility", base: 100, unit: "%", icon: "ph-person-simple-walk", type: "norm" }
+                ],
+                abnormal: { msg: "Low Density.", action: "Calcium supplements advised." }
+            },
+            immune: {
+                title: "Immune System",
+                mainStat: "CD4",
+                animKey: "cd4",
+                simValue: 1000,
+                stats: [
+                    { id: "c1", title: "CD4 Count", base: 1000, unit: "cells/mm3", icon: "ph-shield", type: "norm" },
+                    { id: "c2", title: "WBC Total", base: 7000, unit: "/uL", icon: "ph-users", type: "norm" },
+                    { id: "c3", title: "Neutrophils", base: 60, unit: "%", icon: "ph-chart-pie", type: "norm" },
+                    { id: "c4", title: "CRP", base: 0.5, unit: "mg/L", icon: "ph-fire", type: "norm" }
+                ],
+                abnormal: { msg: "Immune suppression.", action: "Consult specialist." }
+            },
+            dental: {
+                title: "Dental Health",
+                mainStat: "Plaque",
+                animKey: "plq",
+                simValue: 10,
+                stats: [
+                    { id: "c1", title: "Plaque Index", base: 10, unit: "%", icon: "ph-smiley", type: "norm" },
+                    { id: "c2", title: "Gum Health", base: 98, unit: "%", icon: "ph-heart", type: "norm" },
+                    { id: "c3", title: "Cavities", base: 0, unit: "count", icon: "ph-warning-circle", type: "norm" },
+                    { id: "c4", title: "Enamel", base: 100, unit: "%", icon: "ph-shield", type: "norm" }
+                ],
+                abnormal: { msg: "Gingivitis risk.", action: "Dental cleaning required." }
+            },
+            breast: {
+                title: "Breast Health",
+                mainStat: "Density",
+                animKey: "den",
+                simValue: 2,
+                stats: [
+                    { id: "c1", title: "Tissue Density", base: 2, unit: "Cat", icon: "ph-squares-four", type: "norm" },
+                    { id: "c2", title: "Lumps", base: 0, unit: "count", icon: "ph-circle", type: "norm" },
+                    { id: "c3", title: "Pain Level", base: 0, unit: "/10", icon: "ph-smiley-sad", type: "norm" },
+                    { id: "c4", title: "Lymph Nodes", base: 0, unit: "swollen", icon: "ph-dots-three-circle", type: "norm" }
+                ],
+                abnormal: { msg: "Abnormality detected.", action: "Mammogram scheduled." }
+            },
+            ligaments: {
+                title: "Ligaments/Joints",
+                mainStat: "Flex",
+                animKey: "flx",
+                simValue: 90,
+                stats: [
+                    { id: "c1", title: "Flexibility", base: 90, unit: "%", icon: "ph-arrows-out-line-horizontal", type: "norm" },
+                    { id: "c2", title: "Inflammation", base: 5, unit: "%", icon: "ph-fire", type: "norm" },
+                    { id: "c3", title: "Strain", base: 0, unit: "/10", icon: "ph-warning", type: "norm" },
+                    { id: "c4", title: "ACL Integrity", base: 100, unit: "%", icon: "ph-check", type: "norm" }
+                ],
+                abnormal: { msg: "Strain detected.", action: "Rest and ice recommended." }
+            }
+        };
 
-        </section>
+        const getColorClass = (val, type) => {
+            if (type === 'bpm') {
+                if (val < 60 || val > 120) return 'state-red';
+                if (val > 100) return 'state-yellow';
+                return 'state-blue';
+            }
+            if (type === 'perc') {
+                if (val < 80) return 'state-red';
+                if (val < 90) return 'state-yellow';
+                return 'state-blue';
+            }
+            const r = Math.random();
+            if (r > 0.95) return 'state-red';
+            if (r > 0.8) return 'state-yellow';
+            return 'state-blue';
+        };
 
+        let activeOrgan = 'heart';
+        let liveIntervals = [];
 
-        <!-- BOTTOM ORGAN RAIL -->
-        <section class="bottom-rail">
+        // --- AUDIO ENGINE ---
+        const AudioEngine = {
+            ctx: null,
+            beatOsc: null,
+            breathGain: null,
+            heartInterval: null,
+            isActive: false,
 
-            <div class="section-label rail-label">
-                <div class="blue-dot"></div> My Body Condition
-            </div>
+            init: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
 
-            <div class="organ-item">
-                <svg class="organ-icon" viewBox="0 0 24 24">
-                    <path d="M8.5,7 C6,6 3,7 3,10 C3,14 7,16 12,18 C16,17 19,13 19,9 C19,7 16,6 13,7 C12,5 10,6 8.5,7 Z"></path>
-                </svg>
-            </div>
+            toggle: function() {
+                this.init();
+                this.isActive = !this.isActive;
+                
+                if(this.isActive) { 
+                    // Browser policy requires resume() after user gesture
+                    if(this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    this.startOrganSound(activeOrgan);
+                } else {
+                    this.stopAll();
+                }
+                return this.isActive;
+            },
 
-            <div class="organ-item selected">
-                <i class="ph ph-heart"></i>
-                <div class="organ-label">My Heart</div>
-                <div class="organ-arrow"><i class="ph-bold ph-arrow-up-right"></i></div>
-            </div>
+            playHeartbeat: function(bpm) {
+                if (!this.isActive) return;
+                const interval = 60000 / bpm;
+                
+                if(this.heartInterval) clearInterval(this.heartInterval);
 
-            <div class="organ-item"><i class="ph ph-dna"></i></div>
-            <div class="organ-item"><i class="ph ph-brain"></i></div>
+                const playThump = (timeOffset, freq, decay) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    // Slightly louder gain for better audibility
+                    gain.gain.setValueAtTime(0.8, this.ctx.currentTime + timeOffset);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + timeOffset + decay);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + timeOffset);
+                    osc.stop(this.ctx.currentTime + timeOffset + decay + 0.1);
+                };
 
-        </section>
+                const loop = () => {
+                    playThump(0, 60, 0.15); // Lub
+                    playThump(0.2, 50, 0.25); // Dub
+                };
+                
+                loop(); 
+                this.heartInterval = setInterval(loop, interval);
+            },
 
-    </main>
+            playBreathing: function() {
+                if (!this.isActive) return;
+                const bufferSize = this.ctx.sampleRate * 2; 
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
 
-</div>
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                noise.loop = true;
 
-<script src="script.js"></script>
-</body>
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.Q.value = 1;
+
+                this.breathGain = this.ctx.createGain();
+                this.breathGain.gain.value = 0;
+
+                noise.connect(filter);
+                filter.connect(this.breathGain);
+                this.breathGain.connect(this.ctx.destination);
+                noise.start();
+
+                const lfo = this.ctx.createOscillator();
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.2; 
+                const lfoGain = this.ctx.createGain();
+                lfoGain.gain.value = 400; 
+                
+                lfo.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                filter.frequency.value = 500; 
+                lfo.start();
+
+                // Audibility check: Increased gain
+                this.breathGain.gain.setTargetAtTime(0.25, this.ctx.currentTime, 1);
+            },
+
+            stopAll: function() {
+                if(this.heartInterval) clearInterval(this.heartInterval);
+                if(this.breathGain) {
+                    this.breathGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.5);
+                    setTimeout(() => { if(this.breathGain) try { this.breathGain.disconnect(); } catch(e){} }, 500);
+                }
+            },
+
+            startOrganSound: function(organ) {
+                this.stopAll();
+                if(organ === 'heart') {
+                    const bpm = ORGAN_DATA.heart.simValue || 80;
+                    this.playHeartbeat(bpm);
+                } else {
+                    this.playBreathing();
+                }
+            },
+            
+            updateHeartRate(bpm) {
+                if(this.isActive && activeOrgan === 'heart') {
+                    this.playHeartbeat(bpm);
+                }
+            }
+        };
+
+        // --- DASHBOARD LOGIC ---
+        const updateUI = (organType) => {
+            activeOrgan = organType;
+            const data = ORGAN_DATA[organType];
+            
+            // Audio Switch
+            AudioEngine.startOrganSound(organType);
+
+            // Text Updates
+            document.getElementById('section-title').innerHTML = `<div class="blue-dot"></div> ${data.title}`;
+            document.getElementById('mode-pill').innerHTML = `<div class="active-dot"></div> My ${organType.charAt(0).toUpperCase() + organType.slice(1)}`;
+            
+            // AI Panel Reset
+            const aiPanel = document.getElementById('ai-panel');
+            aiPanel.className = 'ai-panel';
+            document.getElementById('ai-title').innerText = "AI ANALYSIS";
+            document.getElementById('ai-text').innerText = "Analyzing recent biometrics. Systems operating within normal parameters.";
+
+            // Card Structure
+            data.stats.forEach((s, i) => {
+                const idx = i + 1;
+                document.getElementById(`c${idx}-title`).innerText = s.title;
+                document.getElementById(`c${idx}-icon`).className = `ph-fill ${s.icon} card-icon`;
+                updateCardValue(idx, s.base, s.unit, s.type);
+            });
+
+            startLiveSimulation(organType);
+        };
+
+        const updateCardValue = (idx, val, unit, type) => {
+            const card = document.getElementById(`card-${idx}`);
+            const state = getColorClass(val, type);
+            
+            if(idx !== 2) {
+                card.className = `data-card ${state}`;
+            } else {
+                if(state === 'state-red') card.className = `data-card state-red`;
+                else card.className = `data-card active-blue`;
+            }
+            
+            const el = document.getElementById(`c${idx}-val`);
+            el.innerHTML = `${val} <span style="font-size:12px;opacity:0.6;">${unit}</span>`;
+            
+            if (idx === 2) {
+                document.getElementById('main-stat').innerHTML = `${val} <span style="font-size:12px;font-weight:500;">${unit}</span>`;
+                const boxBpm = document.getElementById('box-bpm');
+                if(boxBpm) boxBpm.innerText = val;
+
+                if(ORGAN_DATA[activeOrgan].animKey === type) {
+                    ORGAN_DATA[activeOrgan].simValue = val;
+                    // Update audio bpm live
+                    if(activeOrgan === 'heart') AudioEngine.updateHeartRate(val);
+                }
+            }
+        };
+
+        const startLiveSimulation = (organ) => {
+            liveIntervals.forEach(clearInterval);
+            liveIntervals = [];
+            const data = ORGAN_DATA[organ];
+
+            const mainInt = setInterval(() => {
+                let hasAlert = false;
+                data.stats.forEach((s, i) => {
+                    let val = parseFloat(s.base);
+                    let flux = (Math.random() - 0.5) * (val * 0.15); 
+                    if(Math.random() > 0.85) flux *= 2.5; 
+
+                    let newVal = Math.floor(val + flux);
+                    if(s.unit === 'M' || s.unit === 'L' || s.unit.includes('g')) newVal = (val + flux/10).toFixed(1);
+
+                    const state = getColorClass(newVal, s.type);
+                    if(state === 'state-red') hasAlert = true;
+
+                    updateCardValue(i+1, newVal, s.unit, s.type);
+                });
+
+                const aiPanel = document.getElementById('ai-panel');
+                if(hasAlert) {
+                    aiPanel.className = 'ai-panel warn';
+                    document.getElementById('ai-title').innerText = "ATTENTION REQUIRED";
+                    document.getElementById('ai-text').innerText = data.abnormal.msg + " " + data.abnormal.action;
+                } else {
+                    aiPanel.className = 'ai-panel';
+                    document.getElementById('ai-title').innerText = "AI ANALYSIS";
+                    document.getElementById('ai-text').innerText = "Vital signs are stable. No immediate irregularities detected.";
+                }
+
+            }, 2000);
+            liveIntervals.push(mainInt);
+        };
+
+        // --- THREE.JS ENGINE (BIO-SYNC) ---
+        let scene, camera, renderer, group, particles;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let mouseX = 0, mouseY = 0;
+        let spotLight, fillLight;
+
+        const initThree = () => {
+            const container = document.getElementById('model-3d-container');
+            if(!container) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 1, 18);
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            
+            container.appendChild(renderer.domElement);
+
+            // Particles
+            const particlesGeo = new THREE.BufferGeometry();
+            const pCount = 200;
+            const pArray = new Float32Array(pCount * 3);
+            for (let i = 0; i < pCount * 3; i++) pArray[i] = (Math.random() - 0.5) * 20;
+
+            particlesGeo.setAttribute("position", new THREE.BufferAttribute(pArray, 3));
+            const particlesMat = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            particles = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particles);
+
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.2); 
+            scene.add(ambient);
+            
+            spotLight = new THREE.SpotLight(0xffffff, 2); 
+            spotLight.position.set(15, 20, 20); spotLight.angle = 0.6; spotLight.penumbra = 1; 
+            scene.add(spotLight);
+            
+            const rimLight = new THREE.PointLight(0xff0055, 3, 50); rimLight.position.set(-10, 5, -5); scene.add(rimLight);
+            fillLight = new THREE.PointLight(0x3b82f6, 1, 50); fillLight.position.set(10, -10, 10); scene.add(fillLight);
+
+            loadOrganModel('heart');
+            updateUI('heart');
+
+            // --- ANIMATION LOOP ---
+            const clock = new THREE.Clock();
+            const animate = () => {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+                const simVal = ORGAN_DATA[activeOrgan].simValue || 1;
+
+                if (group && !isDragging) {
+                    const type = group.userData.type;
+                    
+                    if (type === 'heart') {
+                        // Advanced Heart Beat Animation
+                        const speed = simVal / 60; 
+                        // Complex beat wave: contraction, relaxation, pause
+                        const beat = Math.sin(t * speed * Math.PI * 2);
+                        const scale = beat > 0.8 ? 1 + (beat-0.8)*0.4 : 1;
+                        
+                        group.scale.set(scale, scale, scale);
+                        group.rotation.y = Math.sin(t * 0.5) * 0.1 + (mouseX * 0.5);
+                        group.rotation.x = Math.cos(t * 0.3) * 0.05 + (mouseY * 0.2);
+                        
+                        spotLight.intensity = 2 + (scale - 1) * 8; 
+
+                    } else if (type === 'lungs') {
+                        const speed = (simVal / 60) * 2;
+                        const breath = 1 + Math.sin(t * speed * Math.PI) * 0.05;
+                        group.scale.set(breath, breath, breath);
+                        group.rotation.y += 0.002;
+
+                    } else if (type === 'brain') {
+                        const speed = simVal * 0.5;
+                        group.rotation.y = Math.sin(t * 0.2) * 0.2;
+                        group.children.forEach(child => {
+                            if(child.material.emissive) {
+                                child.material.emissiveIntensity = 0.3 + Math.sin(t * speed) * 0.2;
+                            }
+                        });
+
+                    } else if (type === 'liver') {
+                         group.rotation.y += 0.002;
+                         group.position.y = Math.sin(t) * 0.1;
+
+                    } else if (type === 'cells') {
+                        group.rotation.z -= 0.002;
+                        group.rotation.y += 0.002;
+                        group.children.forEach((c, i) => {
+                           c.position.y += Math.sin(t * 1 + i) * 0.005;
+                           c.rotation.x += 0.01;
+                        });
+                    }
+                    else {
+                        // generic rotation for placeholders
+                        group.rotation.y += 0.005;
+                    }
+                }
+                
+                if(particles) particles.rotation.y += 0.0005;
+                renderer.render(scene, camera);
+            };
+            animate();
+
+            // INPUT
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                if (isDragging && group) {
+                    const deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
+                    group.rotation.y += deltaMove.x * 0.01;
+                    group.rotation.x += deltaMove.y * 0.01;
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+            
+            container.addEventListener('mousedown', () => isDragging = true);
+            document.addEventListener('mouseup', () => isDragging = false);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        };
+
+        const makeOrganic = (geometry, intensity = 0.1) => {
+            const pos = geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                pos.setX(i, pos.getX(i) + (Math.random() - 0.5) * intensity);
+                pos.setY(i, pos.getY(i) + (Math.random() - 0.5) * intensity);
+                pos.setZ(i, pos.getZ(i) + (Math.random() - 0.5) * intensity);
+            }
+            geometry.computeVertexNormals();
+            return geometry;
+        };
+
+        const loadOrganModel = (type) => {
+            if (group) scene.remove(group);
+            group = new THREE.Group();
+            group.userData.type = type;
+
+            // Updated Realistic Materials
+            const fleshyMat = new THREE.MeshPhysicalMaterial({ 
+                color: 0x8a0303, // Deep Blood Red
+                roughness: 0.4, 
+                metalness: 0.1, 
+                clearcoat: 0.8, 
+                clearcoatRoughness: 0.2,
+                transmission: 0,
+            });
+            
+            const arteryMaterial = new THREE.MeshPhysicalMaterial({ 
+                color: 0x881111, 
+                roughness: 0.4, 
+                metalness: 0.0, 
+                clearcoat: 0.3 
+            });
+            
+            const organMaterial = new THREE.MeshPhysicalMaterial({ 
+                color: 0x660000, 
+                roughness: 0.2, 
+                metalness: 0.1, 
+                clearcoat: 1.0, 
+                clearcoatRoughness: 0.1, 
+                reflectivity: 1 
+            });
+
+            if (type === 'heart') {
+                // High Fidelity Heart Model (Previous)
+                const lvGeo = new THREE.SphereGeometry(3, 32, 32); lvGeo.scale(0.9, 1.4, 0.9);
+                const leftVentricle = new THREE.Mesh(lvGeo, organMaterial); leftVentricle.position.set(0.5, -1, 0); leftVentricle.rotation.z = -0.2; group.add(leftVentricle);
+
+                const rvGeo = new THREE.SphereGeometry(2.6, 32, 32); rvGeo.scale(1, 1.3, 0.8);
+                const rightVentricle = new THREE.Mesh(rvGeo, organMaterial); rightVentricle.position.set(-1.5, -0.5, 0.5); rightVentricle.rotation.z = 0.2; group.add(rightVentricle);
+
+                const laGeo = new THREE.SphereGeometry(1.8, 24, 24); const leftAtrium = new THREE.Mesh(laGeo, organMaterial); leftAtrium.position.set(1.5, 2, -0.5); group.add(leftAtrium);
+                const raGeo = new THREE.SphereGeometry(1.9, 24, 24); const rightAtrium = new THREE.Mesh(raGeo, organMaterial); rightAtrium.position.set(-2, 1.5, 0); group.add(rightAtrium);
+
+                const aortaGeo = new THREE.TorusGeometry(2, 0.8, 16, 32, 2.5); const aorta = new THREE.Mesh(aortaGeo, arteryMaterial); aorta.position.set(0.5, 3.5, 0); aorta.rotation.z = 2.5; aorta.rotation.y = 0.5; group.add(aorta);
+                const paGeo = new THREE.CylinderGeometry(0.9, 0.9, 3, 16); const pulmArtery = new THREE.Mesh(paGeo, arteryMaterial); pulmArtery.position.set(-0.5, 3, 1); pulmArtery.rotation.z = -0.3; pulmArtery.rotation.x = 0.3; group.add(pulmArtery);
+                
+                new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
+            } 
+            else if (type === 'lungs') {
+                // Realistic Lungs: Multiple lobes
+                const lungMat = new THREE.MeshPhysicalMaterial({ 
+                    color: 0xa36666, // More realistic tissue
+                    roughness: 0.7, 
+                    metalness: 0.0, 
+                    clearcoat: 0.2,
+                    flatShading: false
+                });
+                
+                // Right Lung (3 Lobes)
+                const rUpper = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.3, 32, 32)), lungMat);
+                rUpper.position.set(1.5, 1.5, 0);
+                rUpper.scale.set(1, 1.3, 1);
+                
+                const rMiddle = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.1, 32, 32)), lungMat);
+                rMiddle.position.set(1.6, 0.0, 0.2);
+                rMiddle.scale.set(1, 1, 1);
+
+                const rLower = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.3, 32, 32)), lungMat);
+                rLower.position.set(1.5, -1.5, 0);
+                rLower.scale.set(1, 1.4, 1);
+                
+                // Left Lung (2 Lobes + Cardiac Notch)
+                const lUpper = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.25, 32, 32)), lungMat);
+                lUpper.position.set(-1.5, 1.3, 0);
+                lUpper.scale.set(1, 1.4, 1);
+
+                const lLower = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.25, 32, 32)), lungMat);
+                lLower.position.set(-1.5, -1.5, 0);
+                lLower.scale.set(1, 1.5, 1);
+
+                // Trachea (Windpipe)
+                const tracheaGeo = new THREE.CylinderGeometry(0.5, 0.5, 3.5, 16, 4, true); // Hollow-ish look
+                const tracheaMat = new THREE.MeshStandardMaterial({color: 0xeeeeee, roughness: 0.5});
+                const trachea = new THREE.Mesh(tracheaGeo, tracheaMat);
+                trachea.position.set(0, 3.0, 0);
+                
+                // Bronchi
+                const bronchusR = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), tracheaMat);
+                bronchusR.position.set(0.8, 1.5, 0);
+                bronchusR.rotation.z = -0.8;
+                
+                const bronchusL = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), tracheaMat);
+                bronchusL.position.set(-0.8, 1.5, 0);
+                bronchusL.rotation.z = 0.8;
+
+                group.add(rUpper, rMiddle, rLower, lUpper, lLower, trachea, bronchusR, bronchusL);
+                
+                // Adjust Center
+                new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
+            }
+            else if (type === 'brain') {
+                // Realistic Brain: Hemispheres + Cerebellum + Brainstem
+                const brainMat = new THREE.MeshPhysicalMaterial({ 
+                    color: 0xe8d0c6, // Beige-pink
+                    roughness: 0.5, 
+                    clearcoat: 0.8, // Wet look
+                    clearcoatRoughness: 0.3,
+                    subsurfaceScattering: true // fake it with color
+                });
+
+                // Left Hemisphere (Elongated Sphere)
+                const leftHemi = new THREE.Mesh(makeOrganic(new THREE.IcosahedronGeometry(1.8, 3)), brainMat);
+                leftHemi.scale.set(0.8, 1, 1.3);
+                leftHemi.position.set(-0.7, 0.5, 0);
+                
+                // Right Hemisphere
+                const rightHemi = new THREE.Mesh(makeOrganic(new THREE.IcosahedronGeometry(1.8, 3)), brainMat);
+                rightHemi.scale.set(0.8, 1, 1.3);
+                rightHemi.position.set(0.7, 0.5, 0);
+
+                // Cerebellum (Back bottom)
+                const cerebellum = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(1.2, 32, 32), 0.05), brainMat);
+                cerebellum.scale.set(1.5, 0.8, 0.8);
+                cerebellum.position.set(0, -1.2, -1.2);
+
+                // Brainstem
+                const brainstem = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.4, 2.5), brainMat);
+                brainstem.position.set(0, -2.0, 0.5);
+                brainstem.rotation.x = -0.3;
+
+                group.add(leftHemi, rightHemi, cerebellum, brainstem);
+            }
+            else if (type === 'liver') {
+                // Realistic Liver: Large wedge shape
+                const liverMat = new THREE.MeshPhysicalMaterial({ 
+                    color: 0x5c2828, // Dark brownish red
+                    roughness: 0.3, 
+                    metalness: 0.1,
+                    clearcoat: 0.6 
+                });
+
+                // Right Lobe (Big) - Deformed Sphere
+                const rightLobe = new THREE.Mesh(makeOrganic(new THREE.SphereGeometry(2.2, 32, 32), 0.05), liverMat);
+                rightLobe.scale.set(1, 1.2, 1);
+                rightLobe.position.set(1.0, 0, 0);
+                rightLobe.rotation.z = 0.2;
+
+                // Left Lobe (Wedge) - Tapered Cone/Sphere mix
+                const leftLobe = new THREE.Mesh(makeOrganic(new THREE.ConeGeometry(1.8, 3.5, 32), 0.05), liverMat);
+                leftLobe.rotation.z = 1.5; // Lay flat pointing left
+                leftLobe.rotation.y = 0.5;
+                leftLobe.position.set(-1.5, 0.5, 0.5);
+                
+                // Gallbladder (Greenish sac underneath)
+                const gbMat = new THREE.MeshStandardMaterial({color: 0x336633, roughness: 0.2});
+                const gallbladder = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), gbMat);
+                gallbladder.scale.set(1, 2, 1);
+                gallbladder.position.set(0.5, -1.5, 1.5);
+                gallbladder.rotation.x = 0.5;
+
+                group.add(rightLobe, leftLobe, gallbladder);
+                new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
+            }
+            else if (type === 'cells') {
+                // Blood Stream: RBCs + WBCs
+                const rbcMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xcc0000, roughness: 0.4, metalness: 0.1, clearcoat: 0.5
+                });
+                
+                // Create RBC geometry: Torus (rim) + thin Cylinder (center)
+                const rbcGeo = new THREE.TorusGeometry(0.6, 0.2, 16, 32);
+                const centerGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32);
+                centerGeo.rotateX(Math.PI/2);
+                
+                for(let i=0; i<15; i++) {
+                    const cellGroup = new THREE.Group();
+                    const rim = new THREE.Mesh(rbcGeo, rbcMat);
+                    const center = new THREE.Mesh(centerGeo, rbcMat);
+                    center.scale.set(0.9, 1, 0.9); // slight gap
+                    cellGroup.add(rim, center);
+                    
+                    cellGroup.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*10, (Math.random()-0.5)*5);
+                    cellGroup.rotation.set(Math.random()*3, Math.random()*3, 0);
+                    cellGroup.scale.setScalar(0.5 + Math.random()*0.5);
+                    
+                    group.add(cellGroup);
+                }
+                
+                // Add a couple of WBCs (spiky spheres)
+                const wbcMat = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.8});
+                const wbcGeo = new THREE.IcosahedronGeometry(0.8, 1);
+                for(let i=0; i<3; i++) {
+                    const wbc = new THREE.Mesh(wbcGeo, wbcMat);
+                    wbc.position.set((Math.random()-0.5)*8, (Math.random()-0.5)*8, (Math.random()-0.5)*5);
+                    group.add(wbc);
+                }
+            }
+            else {
+                // Placeholder for new organs
+                const placeholderMat = new THREE.MeshPhysicalMaterial({ color: 0xaaaaaa, wireframe: true, transparent: true, opacity: 0.3 });
+                const sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 32, 32), placeholderMat);
+                group.add(sphere);
+            }
+            
+            scene.add(group);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThree();
+
+            // Sound Toggle
+            const soundBtn = document.getElementById('sound-toggle');
+            soundBtn.addEventListener('click', () => {
+                const isActive = AudioEngine.toggle();
+                soundBtn.style.color = isActive ? '#0A84FF' : 'white';
+                soundBtn.style.background = isActive ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
+            });
+
+            document.querySelectorAll('.organ-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.organ-item').forEach(b => b.classList.remove('selected'));
+                    
+                    document.querySelectorAll('.organ-label, .arrow-box').forEach(el => el.remove());
+                    
+                    btn.classList.add('selected');
+                    
+                    const label = document.createElement('div'); label.className = 'organ-label'; 
+                    label.innerText = 'My ' + btn.dataset.organ.charAt(0).toUpperCase() + btn.dataset.organ.slice(1);
+                    btn.appendChild(label);
+                    
+                    const arrow = document.createElement('div'); arrow.className = 'arrow-box'; 
+                    arrow.innerHTML = '<i class="ph-bold ph-arrow-up-right"></i>';
+                    btn.appendChild(arrow);
+                    
+                    const organ = btn.dataset.organ;
+                    loadOrganModel(organ);
+                    updateUI(organ);
+                });
+            });
+        });
+    </script>
+</body> 
 </html>
