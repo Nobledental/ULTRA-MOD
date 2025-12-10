@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Health flo OS - NEO (Bio-Sync Enabled)</title>
     
     <!-- Phosphor Icons -->
@@ -101,7 +101,7 @@
             flex: 1; padding: 30px 40px;
             display: grid;
             grid-template-columns: 1.2fr 1fr 340px; 
-            grid-template-rows: auto 1fr 140px;
+            grid-template-rows: auto 1fr; /* Optimized rows */
             gap: 30px; overflow-y: auto; position: relative;
         }
 
@@ -129,7 +129,8 @@
 
         /* 3D STAGE */
         .heart-stage {
-            grid-column: 1; grid-row: 2; position: relative;
+            grid-column: 1; grid-row: 2 / -1; /* Full height */
+            position: relative;
             display: flex; justify-content: center; align-items: center;
         }
         #model-3d-container { 
@@ -165,15 +166,8 @@
         .live-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .hotspot-dot {
-            position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(255,255,255,0.2); z-index: 5; cursor: pointer;
-            transition: 0.3s;
-        }
-        .hotspot-dot:hover { transform: scale(1.2); background: var(--color-blue); }
-
         /* STATS GRID */
-        .stats-area { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; z-index: 5; }
+        .stats-area { grid-column: 2; grid-row: 2 / -1; display: flex; flex-direction: column; z-index: 5; } /* Full height */
         .section-header { font-size: 13px; font-weight: 700; color: var(--color-blue); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .blue-dot { width: 6px; height: 6px; background: var(--color-blue); border-radius: 50%; box-shadow: 0 0 8px var(--color-blue); }
 
@@ -225,9 +219,61 @@
             color: white; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4); z-index: 2;
         }
 
+        /* RIGHT COLUMN (Organ Icons + Schedule) */
+        .right-column {
+            grid-column: 3; grid-row: 2 / -1;
+            display: flex; flex-direction: column; gap: 20px;
+            overflow-y: auto; padding-right: 5px;
+        }
+
+        /* ORGAN TRAY (Updated Layout - Wrapped Flex) */
+        .organ-tray {
+            display: flex;
+            flex-wrap: wrap; /* Allows wrapping to form rows */
+            gap: 12px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .organ-item {
+            width: 60px; height: 60px; /* Compact size */
+            background: rgba(255,255,255,0.01); 
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        .organ-item:hover { 
+            background: rgba(255,255,255,0.05); 
+            transform: translateY(-3px); 
+            border-color: rgba(255,255,255,0.2);
+        }
+        .organ-item i, .organ-item svg { font-size: 24px; color: var(--text-muted); transition: 0.3s; margin-bottom: 0; fill: none; stroke: currentColor; stroke-width: 1.5; }
+        
+        .organ-item.selected {
+            background: linear-gradient(145deg, rgba(10, 132, 255, 0.1), rgba(0,0,0,0));
+            border-color: var(--color-blue);
+            box-shadow: 0 5px 15px -5px rgba(10, 132, 255, 0.3), inset 0 0 15px rgba(10, 132, 255, 0.1);
+        }
+        .organ-item.selected i, .organ-item.selected svg {
+            color: white; stroke: white; filter: drop-shadow(0 0 8px rgba(10, 132, 255, 0.8)); transform: scale(1.1);
+        }
+        
+        .organ-name-mini { display: none; } /* Hide text for compact grid */
+
+        .organ-label {
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            background: #ffffff; color: #000; font-size: 10px; font-weight: 800;
+            padding: 2px 8px; border-radius: 100px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; white-space: nowrap; z-index: 20;
+        }
+
         /* SCHEDULE AREA */
         .schedule-area {
-            grid-column: 3; grid-row: 2 / 4;
+            flex: 1; /* Fill remaining height */
             background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(24px);
             border-radius: 28px; padding: 24px;
@@ -268,92 +314,43 @@
             box-shadow: 0 10px 30px -5px rgba(10, 132, 255, 0.4); transition: 0.3s;
         }
 
-        /* BOTTOM RAIL */
-        .bottom-rail {
-            grid-column: 1 / 3; grid-row: 3;
-            display: flex; gap: 20px; align-items: center;
-            z-index: 5;
-            overflow-x: auto; /* Allow scrolling for many organs */
-            padding-bottom: 5px;
-        }
-        .organ-item {
-            width: 130px; height: 130px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            border-radius: 24px; display: flex; justify-content: center; align-items: center;
-            position: relative; cursor: pointer; transition: 0.3s;
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-        .organ-item:hover { background: rgba(255,255,255,0.07); transform: translateY(-4px); }
-        
-        .organ-icon { width: 50px; height: 50px; fill: none; stroke: var(--text-muted); stroke-width: 1.5; transition: 0.3s; }
-        .organ-item i { font-size: 48px; color: var(--text-muted); transition: 0.3s; }
-
-        .organ-item.selected {
-            background: rgba(255,255,255,0.1);
-            border-color: var(--color-blue);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
-        }
-        .organ-item.selected .organ-icon, .organ-item.selected i {
-            stroke: var(--color-blue); color: var(--color-blue); filter: drop-shadow(0 0 10px rgba(10, 132, 255, 0.5)); transform: scale(1.1);
-        }
-        
-        .organ-label {
-            position: absolute; bottom: 12px; left: 12px;
-            background: #ffffff; color: #000; font-size: 10px; font-weight: 800;
-            padding: 5px 12px; border-radius: 100px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .arrow-box {
-            position: absolute; bottom: 12px; right: 12px;
-            width: 28px; height: 28px; background: var(--color-blue); border-radius: 10px;
-            display: flex; justify-content: center; align-items: center; color: white; font-size: 12px;
-            box-shadow: 0 5px 15px rgba(10, 132, 255, 0.4); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s backwards;
-        }
-        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
         /* Sound Button */
         .sound-btn {
             position: absolute; top: 20px; left: 20px;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 100; color: white;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 100; color: white; transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
+        .sound-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
 
         /* --- RESPONSIVE OPTIMIZATION --- */
         @media (max-width: 1200px) {
             .main-content {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto auto;
+                grid-template-rows: auto 400px auto auto auto;
                 padding: 20px;
                 overflow-y: scroll;
             }
-            .heart-stage { grid-row: 2; height: 400px; }
+            .heart-stage { grid-row: 2; height: 100%; width: 100%; }
             .stats-area { grid-row: 3; grid-column: 1; }
-            .schedule-area { grid-row: 4; grid-column: 1; }
-            .bottom-rail { grid-row: 5; grid-column: 1; overflow-x: auto; padding-bottom: 20px; }
-            .sidebar { display: none; } /* Hide sidebar on smaller desktop/tablet */
+            .right-column { grid-row: 4; grid-column: 1; overflow: visible; }
+            .sidebar { display: none; }
             .logo { display: none; }
         }
 
         @media (max-width: 768px) {
-            .browser-bar { padding: 0 16px; }
-            .url-bar { display: none; } /* Simplify header */
-            .main-content { padding: 16px; gap: 20px; }
-            .page-title h1 { font-size: 32px; }
-            .heart-stage { height: 350px; }
-            .cards-grid { grid-template-columns: 1fr; } /* Stack cards */
-            .bottom-rail { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
-            .organ-item { min-width: 120px; }
-            
-            /* Add Mobile Bottom Nav Simulation */
-            .app-container::after {
-                content: 'MENU'; 
-                position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
-                background: #0E121B; border-top: 1px solid rgba(255,255,255,0.1);
-                display: flex; justify-content: space-around; align-items: center;
-                font-size: 10px; color: #94a3b8; z-index: 1000; pointer-events: none; opacity: 0.8;
-            }
+            .browser-bar { padding: 0 16px; justify-content: space-between; }
+            .url-bar { display: none; }
+            .nav-icons { display: none; }
+            .main-content { padding: 16px; gap: 20px; display: flex; flex-direction: column; }
+            .page-title h1 { font-size: 36px; }
+            .heart-stage { height: 320px; flex-shrink: 0; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .organ-tray { justify-content: center; } /* Stack on mobile */
+            .organ-item { width: 50px; height: 50px; }
+            .organ-item i, .organ-item svg { font-size: 20px; }
         }
     </style>
 </head>
@@ -369,7 +366,7 @@
             </div>
             <div class="nav-icons"><i class="ph ph-caret-left"></i><i class="ph ph-caret-right"></i></div>
             <div class="url-bar"><i class="ph-fill ph-lock-key"></i><span>Healthflo.com</span><i class="ph ph-arrow-clockwise" style="margin-left: auto;"></i></div>
-            <div class="branding-right">Health flo <span>OS</span></div>
+            <div class="branding-right">Health flo <span>OS NEO</span></div>
         </div>
 
         <div class="dashboard-body">
@@ -461,97 +458,36 @@
                     </div>
                 </div>
 
-                <!-- Schedule / AI Analysis -->
-                <div class="schedule-area">
-                    <div class="section-header"><div class="blue-dot"></div> My Schedule</div>
-                    
-                    <!-- AI Suggestion Box (Dynamic) -->
-                    <div class="ai-panel" id="ai-panel">
-                        <span class="ai-title" id="ai-title">AI ANALYSIS</span>
-                        <p class="ai-text" id="ai-text">Patient vitals are stable. All organ functions within normal range. Monitoring active.</p>
+                <!-- RIGHT COLUMN (Organs + Schedule) -->
+                <div class="right-column">
+                    <!-- 1. ORGAN ICONS TRAY -->
+                    <div class="section-header"><div class="blue-dot"></div> Select Organ</div>
+                    <div class="organ-tray">
+                        <!-- Populated by JS -->
                     </div>
 
-                    <div class="next-checkup" style="margin-top: 20px;">
-                        <div><div style="font-size:11px; color:#9ca3af; margin-bottom:4px; font-weight: 600;">NEXT CHECKUP</div><div style="font-weight:700; font-size: 15px;">Fri, 24 Mar</div></div>
-                        <i class="ph-fill ph-calendar-check" style="font-size:24px; color: var(--color-blue);"></i>
-                    </div>
-                    <div class="date-nav">
-                        <div class="nav-arrow"><i class="ph-bold ph-caret-left"></i></div><span style="font-size:13px; color:white; font-weight:600;">20 March 2023</span><div class="nav-arrow"><i class="ph-bold ph-caret-right"></i></div>
-                    </div>
-                    <div class="doc-list">
-                        <div class="doc-row"><img src="https://randomuser.me/api/portraits/men/32.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Hanzer Jon</div><div style="font-size:11px; color:#9ca3af;">Cardiologist</div></div></div>
-                        <div class="doc-row"><img src="https://randomuser.me/api/portraits/men/45.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Steve Alex</div><div style="font-size:11px; color:#9ca3af;">Surgeon</div></div></div>
-                    </div>
-                    <button class="consult-btn">Consult Now <i class="ph-bold ph-arrow-right"></i></button>
-                </div>
+                    <!-- 2. SCHEDULE AREA -->
+                    <div class="schedule-area">
+                        <div class="section-header" style="margin-bottom:10px;"><div class="blue-dot"></div> AI Analysis</div>
+                        
+                        <!-- AI Suggestion Box (Dynamic) -->
+                        <div class="ai-panel" id="ai-panel">
+                            <span class="ai-title" id="ai-title">AI ANALYSIS</span>
+                            <p class="ai-text" id="ai-text">Patient vitals are stable. All organ functions within normal range. Monitoring active.</p>
+                        </div>
 
-                <!-- Bottom Rail -->
-                <div class="bottom-rail">
-                    <div class="section-header" style="position: absolute; top:-25px;"><div class="blue-dot"></div> My Body Condition</div>
-                    
-                    <div class="organ-item" data-organ="liver">
-                        <svg class="organ-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8.5,7 C6,6 3,7 3,10 C3,14 7,16 12,18 C16,17 19,13 19,9 C19,7 16,6 13,7 C12,5 10,6 8.5,7 Z" />
-                        </svg>
-                    </div>
-
-                    <div class="organ-item selected" data-organ="heart">
-                        <i class="ph ph-heart"></i>
-                        <div class="organ-label">My Heart</div>
-                        <div class="arrow-box"><i class="ph-bold ph-arrow-up-right"></i></div>
-                    </div>
-
-                    <div class="organ-item" data-organ="lungs">
-                        <i class="ph ph-wind"></i>
-                    </div>
-
-                    <div class="organ-item" data-organ="cells">
-                        <i class="ph ph-dna"></i>
-                    </div>
-
-                    <div class="organ-item" data-organ="brain">
-                        <i class="ph ph-brain"></i>
-                    </div>
-
-                    <div class="organ-item" data-organ="kidneys">
-                        <i class="ph ph-egg"></i>
-                    </div>
-
-                    <div class="organ-item" data-organ="stomach">
-                        <i class="ph ph-flask"></i>
-                    </div>
-
-                    <div class="organ-item" data-organ="intestines">
-                        <i class="ph ph-waves"></i>
-                    </div>
-
-                    <!-- New Organs -->
-                    <div class="organ-item" data-organ="eyes">
-                        <i class="ph ph-eye"></i>
-                    </div>
-                    <div class="organ-item" data-organ="pancreas">
-                        <i class="ph ph-cookie"></i>
-                    </div>
-                    <div class="organ-item" data-organ="gallbladder">
-                        <i class="ph ph-drop-half"></i>
-                    </div>
-                    <div class="organ-item" data-organ="urinary">
-                        <i class="ph ph-drop"></i>
-                    </div>
-                    <div class="organ-item" data-organ="skeletal">
-                        <i class="ph ph-skull"></i>
-                    </div>
-                    <div class="organ-item" data-organ="immune">
-                        <i class="ph ph-shield-check"></i>
-                    </div>
-                    <div class="organ-item" data-organ="dental">
-                        <i class="ph ph-smiley"></i>
-                    </div>
-                    <div class="organ-item" data-organ="breast">
-                        <i class="ph ph-gender-female"></i>
-                    </div>
-                    <div class="organ-item" data-organ="ligaments">
-                        <i class="ph ph-link"></i>
+                        <div class="next-checkup" style="margin-top: 20px;">
+                            <div><div style="font-size:11px; color:#9ca3af; margin-bottom:4px; font-weight: 600;">NEXT CHECKUP</div><div style="font-weight:700; font-size: 15px;">Fri, 24 Mar</div></div>
+                            <i class="ph-fill ph-calendar-check" style="font-size:24px; color: var(--color-blue);"></i>
+                        </div>
+                        <div class="date-nav">
+                            <div class="nav-arrow"><i class="ph-bold ph-caret-left"></i></div><span style="font-size:13px; color:white; font-weight:600;">20 March 2023</span><div class="nav-arrow"><i class="ph-bold ph-caret-right"></i></div>
+                        </div>
+                        <div class="doc-list">
+                            <div class="doc-row"><img src="https://randomuser.me/api/portraits/men/32.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Hanzer Jon</div><div style="font-size:11px; color:#9ca3af;">Cardiologist</div></div></div>
+                            <div class="doc-row"><img src="https://randomuser.me/api/portraits/women/45.jpg" class="doc-img" alt=""><div><div style="font-size:13px; font-weight:700; color:white;">Dr. Sarah Lee</div><div style="font-size:11px; color:#9ca3af;">Neurologist</div></div></div>
+                        </div>
+                        <button class="consult-btn">Consult Now <i class="ph-bold ph-arrow-right"></i></button>
                     </div>
                 </div>
 
@@ -560,228 +496,263 @@
     </div>
     
     <script>
-        // --- DATA STORE ---
+        // --- CONFIGURATION ---
+        // UPDATE THIS PATH to your GitHub repo's raw content folder for 3d models
+        // Example: 'https://raw.githubusercontent.com/YourName/YourRepo/main/3d_models/'
+        // The loader will look for: GITHUB_REPO_PATH + organName + '.glb'
+        const GITHUB_REPO_PATH = 'https://raw.githubusercontent.com/dhivakaran/healthflo-3d-assets/main/3d_models/'; 
+        
+        // --- CUSTOM SVG ICONS FOR ORGANS ---
+        const ORGAN_SVGS = {
+            liver: `<svg viewBox="0 0 24 24"><path d="M20.5 13.5c-.5-3.5-3.5-6.5-8.5-6.5s-8 3-8 6.5c0 3.5 3 6.5 6 6.5 1.5 0 3-.5 4.5-1.5 3.5-2.5 5.5-3.5 6-5z" /><path d="M8 8.5v3" /></svg>`,
+            lungs: `<svg viewBox="0 0 24 24"><path d="M12 2v20M6 5c-2.2 0-4 2.2-4 5.5S4 19 6.5 19 11 17 11 12 8.2 5 6 5zM18 5c2.2 0 4 2.2 4 5.5S20 19 17.5 19 13 17 13 12 15.8 5 18 5z" /></svg>`,
+            kidneys: `<svg viewBox="0 0 24 24"><path d="M7.5 6c-2.5 0-4.5 2-4.5 5.5s3 7.5 6 7.5c2 0 3-1.5 3-4-1 1-3 0-3-2s2-3.5 4.5-3.5c-1-2.5-3.5-3.5-6-3.5z" /><path d="M16.5 6c2.5 0 4.5 2 4.5 5.5s-3 7.5-6 7.5c-2 0-3-1.5-3-4 1 1 3 0 3-2s-2-3.5-4.5-3.5c1-2.5 3.5-3.5 6-3.5z" /></svg>`,
+            stomach: `<svg viewBox="0 0 24 24"><path d="M7 5c2-2 7-2 9 0 2 2 2 6 0 9-1 1.5-3 5-3 5-2 1-5 1-7-1s-3-5-2-8c1-3 3-5 3-5z" /><path d="M10 8h4" /></svg>`,
+            intestines: `<svg viewBox="0 0 24 24"><path d="M6 5c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2v1c0 1.1-.9 2-2 2H8c-1.1 0-2 .9-2 2v1c0 1.1.9 2 2 2h8c1.1 0 2 .9 2 2v1c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V5z" /></svg>`,
+            pancreas: `<svg viewBox="0 0 24 24"><path d="M21 9c-1-2-4-2-6 0l-9 9c-2 2-2 4 0 4s2 2 4 0l11-11c.5-.5 1-1.5 0-2z" /><path d="M12 12l2 2" /></svg>`,
+            gallbladder: `<svg viewBox="0 0 24 24"><path d="M12 3c-1.5 0-3 1.5-3 3v2c0 3.5 2 8 3 8s3-4.5 3-8V6c0-1.5-1.5-3-3-3z" /></svg>`,
+            urinary: `<svg viewBox="0 0 24 24"><path d="M12 4v4M8 10c0 4 1.5 8 4 8s4-4 4-8H8zM12 18v3" /></svg>`
+        };
+
+        // --- COMPREHENSIVE ORGAN DATA ---
         const ORGAN_DATA = {
             heart: {
                 title: "My Heart Condition",
                 mainStat: "BPM",
                 animKey: "bpm", 
                 simValue: 80,
+                icon: "ph-heart",
                 stats: [
-                    { id: "c1", title: "Blood Status", base: 116, unit: "/70", icon: "ph-drop", type: "bp" },
-                    { id: "c2", title: "Heart Rate", base: 120, unit: "bpm", icon: "ph-heartbeat", type: "bpm" },
-                    { id: "c3", title: "Blood Count", base: 85, unit: "", icon: "ph-chart-bar", type: "norm" },
-                    { id: "c4", title: "Glucose Level", base: 230, unit: "/ml", icon: "ph-dna", type: "norm" }
+                    { id: "c1", title: "Blood Pressure", base: 116, unit: "/70", icon: "ph-drop", type: "bp" },
+                    { id: "c2", title: "Heart Rate", base: 80, unit: "bpm", icon: "ph-heartbeat", type: "bpm" },
+                    { id: "c3", title: "O2 Saturation", base: 98, unit: "%", icon: "ph-activity", type: "norm" },
+                    { id: "c4", title: "Cardiac Output", base: 5.2, unit: "L/min", icon: "ph-waves", type: "norm" }
                 ],
-                abnormal: { msg: "Arrhythmia Detected. Irregular heart rhythm.", action: "Recommend immediate ECG scan." }
+                abnormal: { msg: "Arrhythmia Detected.", action: "Recommend immediate ECG." }
             },
             brain: {
-                title: "My Brain Condition",
+                title: "Brain & Nervous System",
                 mainStat: "Hz",
                 animKey: "hz",
                 simValue: 14,
+                icon: "ph-brain",
                 stats: [
                     { id: "c1", title: "Brain Waves", base: 14, unit: "Hz", icon: "ph-wave-sine", type: "hz" },
-                    { id: "c2", title: "Stress Level", base: 24, unit: "%", icon: "ph-brain", type: "perc" },
-                    { id: "c3", title: "Oxygenation", base: 98, unit: "%", icon: "ph-wind", type: "perc" },
-                    { id: "c4", title: "ICP", base: 12, unit: "mmHg", icon: "ph-lightning", type: "norm" }
+                    { id: "c2", title: "Cognitive Load", base: 45, unit: "%", icon: "ph-lightning", type: "perc" },
+                    { id: "c3", title: "Oxygenation", base: 99, unit: "%", icon: "ph-wind", type: "perc" },
+                    { id: "c4", title: "ICP", base: 11, unit: "mmHg", icon: "ph-gauge", type: "norm" }
                 ],
-                abnormal: { msg: "High Cortisol Levels.", action: "Suggest mindfulness or neurology consult." }
+                abnormal: { msg: "High Cortisol Levels.", action: "Stress reduction advised." }
             },
             liver: {
-                title: "My Liver Condition",
-                mainStat: "mg",
+                title: "Liver Function",
+                mainStat: "Tox",
                 animKey: "tox",
                 simValue: 5,
+                icon: "svg-liver",
                 stats: [
                     { id: "c1", title: "ALT Enzymes", base: 29, unit: "U/L", icon: "ph-flask", type: "norm" },
-                    { id: "c2", title: "Toxicity", base: 5, unit: "%", icon: "ph-virus", type: "tox" },
-                    { id: "c3", title: "Bilirubin", base: 1.1, unit: "mg", icon: "ph-test-tube", type: "norm" },
-                    { id: "c4", title: "Albumin", base: 4.5, unit: "g", icon: "ph-egg", type: "norm" }
+                    { id: "c2", title: "Toxicity Filter", base: 95, unit: "%", icon: "ph-shield-check", type: "perc" },
+                    { id: "c3", title: "Bilirubin", base: 0.8, unit: "mg", icon: "ph-test-tube", type: "norm" },
+                    { id: "c4", title: "Albumin", base: 4.2, unit: "g/dL", icon: "ph-egg", type: "norm" }
                 ],
-                abnormal: { msg: "Elevated Enzymes.", action: "Check dietary intake and hydration." }
-            },
-            cells: {
-                title: "Cellular Status",
-                mainStat: "Count",
-                animKey: "rep",
-                simValue: 1,
-                stats: [
-                    { id: "c1", title: "WBC Count", base: 6500, unit: "", icon: "ph-shield-check", type: "count" },
-                    { id: "c2", title: "Immunity", base: 95, unit: "%", icon: "ph-shield-plus", type: "perc" },
-                    { id: "c3", title: "RBC Count", base: 5.1, unit: "M", icon: "ph-drop", type: "count" },
-                    { id: "c4", title: "Platelets", base: 250, unit: "k", icon: "ph-first-aid", type: "count" }
-                ],
-                abnormal: { msg: "Low WBC Count.", action: "Monitor temperature and avoid exposure." }
+                abnormal: { msg: "Elevated Enzymes.", action: "Dietary review needed." }
             },
             lungs: {
-                title: "My Lung Condition",
-                mainStat: "rpm",
+                title: "Respiratory System",
+                mainStat: "RPM",
                 animKey: "rpm",
                 simValue: 16,
+                icon: "svg-lungs",
                 stats: [
                     { id: "c1", title: "Resp Rate", base: 16, unit: "rpm", icon: "ph-wind", type: "rpm" },
-                    { id: "c2", title: "SpO2", base: 98, unit: "%", icon: "ph-drop", type: "perc" },
-                    { id: "c3", title: "Capacity", base: 4.5, unit: "L", icon: "ph-chart-bar", type: "norm" },
-                    { id: "c4", title: "CO2", base: 25, unit: "mmol", icon: "ph-cloud", type: "norm" }
+                    { id: "c2", title: "SpO2 Level", base: 98, unit: "%", icon: "ph-drop", type: "perc" },
+                    { id: "c3", title: "Lung Capacity", base: 4.8, unit: "L", icon: "ph-chart-bar", type: "norm" },
+                    { id: "c4", title: "EtCO2", base: 38, unit: "mmHg", icon: "ph-cloud", type: "norm" }
                 ],
-                abnormal: { msg: "Low Oxygen Saturation.", action: "Deep breathing exercises recommended." }
+                abnormal: { msg: "Reduced Capacity.", action: "Spirometry test advised." }
             },
             kidneys: {
-                title: "Kidney Function",
+                title: "Renal Function",
                 mainStat: "GFR",
                 animKey: "gfr",
                 simValue: 90,
+                icon: "svg-kidneys",
                 stats: [
-                    { id: "c1", title: "GFR", base: 90, unit: "mL/min", icon: "ph-drop", type: "norm" },
-                    { id: "c2", title: "Creatinine", base: 0.9, unit: "mg/dL", icon: "ph-flask", type: "norm" },
-                    { id: "c3", title: "Urea", base: 12, unit: "mg/dL", icon: "ph-test-tube", type: "norm" },
-                    { id: "c4", title: "Electrolytes", base: 100, unit: "%", icon: "ph-lightning", type: "norm" }
+                    { id: "c1", title: "GFR", base: 95, unit: "mL", icon: "ph-activity", type: "norm" },
+                    { id: "c2", title: "Creatinine", base: 0.9, unit: "mg", icon: "ph-flask", type: "norm" },
+                    { id: "c3", title: "Urea (BUN)", base: 14, unit: "mg", icon: "ph-test-tube", type: "norm" },
+                    { id: "c4", title: "Hydration", base: 92, unit: "%", icon: "ph-drop-half", type: "perc" }
                 ],
-                abnormal: { msg: "Reduced Filtration.", action: "Increase hydration." }
+                abnormal: { msg: "Low Filtration.", action: "Increase fluid intake." }
             },
             stomach: {
-                title: "Gastric Status",
+                title: "Gastric Health",
                 mainStat: "pH",
                 animKey: "ph",
                 simValue: 2,
+                icon: "svg-stomach",
                 stats: [
-                    { id: "c1", title: "Acidity (pH)", base: 2.0, unit: "pH", icon: "ph-drop", type: "norm" },
+                    { id: "c1", title: "Acidity (pH)", base: 2.1, unit: "pH", icon: "ph-drop", type: "norm" },
                     { id: "c2", title: "Motility", base: 3, unit: "cpm", icon: "ph-waves", type: "norm" },
-                    { id: "c3", title: "Enzymes", base: 100, unit: "%", icon: "ph-flask", type: "norm" },
-                    { id: "c4", title: "Flora", base: 98, unit: "%", icon: "ph-plant", type: "norm" }
+                    { id: "c3", title: "Digestion", base: 94, unit: "%", icon: "ph-percent", type: "perc" },
+                    { id: "c4", title: "Microbiome", base: 90, unit: "Sc", icon: "ph-plant", type: "norm" }
                 ],
-                abnormal: { msg: "High Acidity.", action: "Dietary adjustment required." }
+                abnormal: { msg: "High Acidity.", action: "Antacid recommended." }
             },
             intestines: {
-                title: "Intestinal Health",
-                mainStat: "Motility",
+                title: "Intestinal Tract",
+                mainStat: "Absorp",
                 animKey: "mot",
-                simValue: 8,
+                simValue: 95,
+                icon: "svg-intestines", 
                 stats: [
-                    { id: "c1", title: "Motility", base: 8, unit: "/min", icon: "ph-activity", type: "norm" },
-                    { id: "c2", title: "Absorption", base: 95, unit: "%", icon: "ph-arrows-in", type: "norm" },
-                    { id: "c3", title: "Flora Balance", base: 92, unit: "%", icon: "ph-plant", type: "norm" },
-                    { id: "c4", title: "Hydration", base: 90, unit: "%", icon: "ph-drop", type: "norm" }
+                    { id: "c1", title: "Peristalsis", base: 8, unit: "/min", icon: "ph-arrows-left-right", type: "norm" },
+                    { id: "c2", title: "Absorption", base: 95, unit: "%", icon: "ph-arrow-fat-lines-in", type: "perc" },
+                    { id: "c3", title: "Flora", base: 92, unit: "%", icon: "ph-plant", type: "norm" },
+                    { id: "c4", title: "Fiber Intake", base: 25, unit: "g", icon: "ph-carrot", type: "norm" }
                 ],
-                abnormal: { msg: "Irregular Motility.", action: "Probiotics recommended." }
+                abnormal: { msg: "Slow Transit.", action: "Increase fiber intake." }
             },
             eyes: {
-                title: "Visual Health",
-                mainStat: "IOP",
-                animKey: "iop",
-                simValue: 15,
+                title: "Ocular Health",
+                mainStat: "Vision",
+                animKey: "vis",
+                simValue: 20,
+                icon: "ph-eye",
                 stats: [
-                    { id: "c1", title: "Vision", base: 20, unit: "/20", icon: "ph-eye", type: "norm" },
-                    { id: "c2", title: "IOP", base: 15, unit: "mmHg", icon: "ph-gauge", type: "norm" },
-                    { id: "c3", title: "Pupil React", base: 3, unit: "mm", icon: "ph-circle", type: "norm" },
-                    { id: "c4", title: "Tear Prod", base: 10, unit: "mm", icon: "ph-drop", type: "norm" }
+                    { id: "c1", title: "Acuity (R)", base: 20, unit: "/20", icon: "ph-eye", type: "norm" },
+                    { id: "c2", title: "Acuity (L)", base: 20, unit: "/20", icon: "ph-eye", type: "norm" },
+                    { id: "c3", title: "Pressure", base: 16, unit: "mmHg", icon: "ph-gauge", type: "norm" },
+                    { id: "c4", title: "Response", base: 150, unit: "ms", icon: "ph-timer", type: "norm" }
                 ],
-                abnormal: { msg: "Elevated Pressure.", action: "Glaucoma check advised." }
+                abnormal: { msg: "Elevated IOP.", action: "Glaucoma screening." }
             },
             pancreas: {
-                title: "Pancreatic Status",
+                title: "Pancreatic System",
                 mainStat: "Insulin",
                 animKey: "ins",
-                simValue: 10,
+                simValue: 12,
+                icon: "svg-pancreas",
                 stats: [
-                    { id: "c1", title: "Insulin", base: 10, unit: "uIU/mL", icon: "ph-drop", type: "norm" },
-                    { id: "c2", title: "Amylase", base: 50, unit: "U/L", icon: "ph-flask", type: "norm" },
-                    { id: "c3", title: "Lipase", base: 40, unit: "U/L", icon: "ph-test-tube", type: "norm" },
-                    { id: "c4", title: "Glucose", base: 90, unit: "mg/dL", icon: "ph-cube", type: "norm" }
+                    { id: "c1", title: "Insulin", base: 12, unit: "uIU", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "Glucose", base: 92, unit: "mg", icon: "ph-cube", type: "norm" },
+                    { id: "c3", title: "Lipase", base: 45, unit: "U/L", icon: "ph-flask", type: "norm" },
+                    { id: "c4", title: "Amylase", base: 55, unit: "U/L", icon: "ph-test-tube", type: "norm" }
                 ],
-                abnormal: { msg: "Enzyme Imbalance.", action: "Monitor diet and sugar." }
+                abnormal: { msg: "Sugar Spike.", action: "Monitor carbohydrate intake." }
             },
             gallbladder: {
                 title: "Gallbladder",
-                mainStat: "Flow",
+                mainStat: "Bile",
                 animKey: "bile",
-                simValue: 98,
+                simValue: 100,
+                icon: "svg-gallbladder",
                 stats: [
                     { id: "c1", title: "Bile Flow", base: 100, unit: "%", icon: "ph-waves", type: "norm" },
-                    { id: "c2", title: "Stones", base: 0, unit: "count", icon: "ph-circles-three", type: "norm" },
+                    { id: "c2", title: "Calculi", base: 0, unit: "cnt", icon: "ph-prohibit", type: "norm" },
                     { id: "c3", title: "Wall Thick", base: 2, unit: "mm", icon: "ph-ruler", type: "norm" },
-                    { id: "c4", title: "Inflammation", base: 0, unit: "%", icon: "ph-fire", type: "norm" }
+                    { id: "c4", title: "Ejection", base: 65, unit: "%", icon: "ph-arrow-fat-up", type: "norm" }
                 ],
-                abnormal: { msg: "Bile blockage.", action: "Ultrasound recommended." }
+                abnormal: { msg: "Flow Reduced.", action: "Ultrasound advised." }
             },
             urinary: {
-                title: "Urinary System",
+                title: "Urinary Tract",
                 mainStat: "Output",
                 animKey: "out",
                 simValue: 1500,
+                icon: "svg-urinary",
                 stats: [
-                    { id: "c1", title: "Daily Output", base: 1500, unit: "mL", icon: "ph-drop", type: "norm" },
-                    { id: "c2", title: "pH", base: 6.0, unit: "pH", icon: "ph-test-tube", type: "norm" },
-                    { id: "c3", title: "Specific Gravity", base: 1.015, unit: "", icon: "ph-flask", type: "norm" },
-                    { id: "c4", title: "Protein", base: 0, unit: "mg", icon: "ph-prohibit", type: "norm" }
+                    { id: "c1", title: "24h Output", base: 1.5, unit: "L", icon: "ph-drop", type: "norm" },
+                    { id: "c2", title: "pH Level", base: 6.0, unit: "pH", icon: "ph-test-tube", type: "norm" },
+                    { id: "c3", title: "Specific Grav", base: 1.01, unit: "sg", icon: "ph-flask", type: "norm" },
+                    { id: "c4", title: "Leukocytes", base: 0, unit: "neg", icon: "ph-shield", type: "norm" }
                 ],
-                abnormal: { msg: "Dehydration signs.", action: "Increase water intake." }
+                abnormal: { msg: "Trace Protein.", action: "Retest in 24 hours." }
             },
             skeletal: {
                 title: "Skeletal System",
-                mainStat: "BMD",
-                animKey: "bmd",
+                mainStat: "Density",
+                animKey: "den",
                 simValue: 0,
+                icon: "ph-bone",
                 stats: [
-                    { id: "c1", title: "Bone Density", base: 0, unit: "T-Score", icon: "ph-chart-bar", type: "norm" },
-                    { id: "c2", title: "Calcium", base: 9.5, unit: "mg/dL", icon: "ph-drop", type: "norm" },
-                    { id: "c3", title: "Vit D", base: 30, unit: "ng/mL", icon: "ph-sun", type: "norm" },
-                    { id: "c4", title: "Joint Mobility", base: 100, unit: "%", icon: "ph-person-simple-walk", type: "norm" }
+                    { id: "c1", title: "Bone Density", base: 0.5, unit: "T", icon: "ph-chart-bar", type: "norm" },
+                    { id: "c2", title: "Calcium", base: 9.4, unit: "mg", icon: "ph-drop", type: "norm" },
+                    { id: "c3", title: "Vit D3", base: 45, unit: "ng", icon: "ph-sun", type: "norm" },
+                    { id: "c4", title: "Marrow Act", base: 98, unit: "%", icon: "ph-activity", type: "perc" }
                 ],
-                abnormal: { msg: "Low Density.", action: "Calcium supplements advised." }
+                abnormal: { msg: "Mild Osteopenia.", action: "Increase Calcium/D3." }
+            },
+            cells: {
+                title: "Cellular Health",
+                mainStat: "Count",
+                animKey: "wbc",
+                simValue: 6.5,
+                icon: "ph-dna",
+                stats: [
+                    { id: "c1", title: "WBC Count", base: 6.5, unit: "k", icon: "ph-shield-check", type: "norm" },
+                    { id: "c2", title: "RBC Count", base: 5.1, unit: "M", icon: "ph-drop", type: "norm" },
+                    { id: "c3", title: "Platelets", base: 250, unit: "k", icon: "ph-bandaids", type: "norm" },
+                    { id: "c4", title: "Regen Rate", base: 95, unit: "%", icon: "ph-arrows-clockwise", type: "perc" }
+                ],
+                abnormal: { msg: "Low Platelets.", action: "Hematology consult." }
             },
             immune: {
                 title: "Immune System",
-                mainStat: "CD4",
-                animKey: "cd4",
-                simValue: 1000,
+                mainStat: "Resp",
+                animKey: "imm",
+                simValue: 98,
+                icon: "ph-shield-star",
                 stats: [
-                    { id: "c1", title: "CD4 Count", base: 1000, unit: "cells/mm3", icon: "ph-shield", type: "norm" },
-                    { id: "c2", title: "WBC Total", base: 7000, unit: "/uL", icon: "ph-users", type: "norm" },
-                    { id: "c3", title: "Neutrophils", base: 60, unit: "%", icon: "ph-chart-pie", type: "norm" },
-                    { id: "c4", title: "CRP", base: 0.5, unit: "mg/L", icon: "ph-fire", type: "norm" }
+                    { id: "c1", title: "Response", base: 98, unit: "%", icon: "ph-lightning", type: "perc" },
+                    { id: "c2", title: "Neutrophils", base: 60, unit: "%", icon: "ph-chart-pie", type: "norm" },
+                    { id: "c3", title: "Lymphocytes", base: 30, unit: "%", icon: "ph-users", type: "norm" },
+                    { id: "c4", title: "Inflammation", base: 0.3, unit: "CRP", icon: "ph-fire", type: "norm" }
                 ],
-                abnormal: { msg: "Immune suppression.", action: "Consult specialist." }
+                abnormal: { msg: "Elevated CRP.", action: "Check for infection." }
             },
             dental: {
                 title: "Dental Health",
                 mainStat: "Plaque",
-                animKey: "plq",
-                simValue: 10,
+                animKey: "den",
+                simValue: 5,
+                icon: "ph-smiley",
                 stats: [
-                    { id: "c1", title: "Plaque Index", base: 10, unit: "%", icon: "ph-smiley", type: "norm" },
-                    { id: "c2", title: "Gum Health", base: 98, unit: "%", icon: "ph-heart", type: "norm" },
-                    { id: "c3", title: "Cavities", base: 0, unit: "count", icon: "ph-warning-circle", type: "norm" },
-                    { id: "c4", title: "Enamel", base: 100, unit: "%", icon: "ph-shield", type: "norm" }
+                    { id: "c1", title: "Plaque Idx", base: 5, unit: "%", icon: "ph-sparkle", type: "norm" },
+                    { id: "c2", title: "Gum Health", base: 98, unit: "%", icon: "ph-heart", type: "perc" },
+                    { id: "c3", title: "Enamel", base: 95, unit: "%", icon: "ph-shield", type: "perc" },
+                    { id: "c4", title: "pH Balance", base: 7.0, unit: "pH", icon: "ph-drop", type: "norm" }
                 ],
-                abnormal: { msg: "Gingivitis risk.", action: "Dental cleaning required." }
+                abnormal: { msg: "Gingivitis Risk.", action: "Hygiene review." }
             },
             breast: {
-                title: "Breast Health",
-                mainStat: "Density",
-                animKey: "den",
+                title: "Breast Tissue",
+                mainStat: "Dense",
+                animKey: "br",
                 simValue: 2,
+                icon: "ph-gender-female",
                 stats: [
-                    { id: "c1", title: "Tissue Density", base: 2, unit: "Cat", icon: "ph-squares-four", type: "norm" },
-                    { id: "c2", title: "Lumps", base: 0, unit: "count", icon: "ph-circle", type: "norm" },
-                    { id: "c3", title: "Pain Level", base: 0, unit: "/10", icon: "ph-smiley-sad", type: "norm" },
-                    { id: "c4", title: "Lymph Nodes", base: 0, unit: "swollen", icon: "ph-dots-three-circle", type: "norm" }
+                    { id: "c1", title: "Density", base: 2, unit: "Cat", icon: "ph-squares-four", type: "norm" },
+                    { id: "c2", title: "Vascularity", base: "Norm", unit: "", icon: "ph-waves", type: "norm" },
+                    { id: "c3", title: "Lymph Nodes", base: "Clrv", unit: "", icon: "ph-check-circle", type: "norm" },
+                    { id: "c4", title: "Asymmetry", base: 0, unit: "%", icon: "ph-scales", type: "norm" }
                 ],
-                abnormal: { msg: "Abnormality detected.", action: "Mammogram scheduled." }
+                abnormal: { msg: "Dense Tissue.", action: "Annual mammogram." }
             },
             ligaments: {
-                title: "Ligaments/Joints",
+                title: "Joints & Ligaments",
                 mainStat: "Flex",
                 animKey: "flx",
-                simValue: 90,
+                simValue: 85,
+                icon: "ph-person-simple-run",
                 stats: [
-                    { id: "c1", title: "Flexibility", base: 90, unit: "%", icon: "ph-arrows-out-line-horizontal", type: "norm" },
-                    { id: "c2", title: "Inflammation", base: 5, unit: "%", icon: "ph-fire", type: "norm" },
-                    { id: "c3", title: "Strain", base: 0, unit: "/10", icon: "ph-warning", type: "norm" },
-                    { id: "c4", title: "ACL Integrity", base: 100, unit: "%", icon: "ph-check", type: "norm" }
+                    { id: "c1", title: "Flexibility", base: 85, unit: "%", icon: "ph-arrows-out", type: "perc" },
+                    { id: "c2", title: "Synovial Fld", base: 100, unit: "%", icon: "ph-drop", type: "norm" },
+                    { id: "c3", title: "Inflammation", base: 2, unit: "%", icon: "ph-fire", type: "norm" },
+                    { id: "c4", title: "Cartilage", base: 90, unit: "%", icon: "ph-circle-notch", type: "norm" }
                 ],
-                abnormal: { msg: "Strain detected.", action: "Rest and ice recommended." }
+                abnormal: { msg: "Stiffness.", action: "Mobility exercises." }
             }
         };
 
@@ -805,13 +776,14 @@
         let activeOrgan = 'heart';
         let liveIntervals = [];
 
-        // --- AUDIO ENGINE ---
+        // --- BIO-SYNC AUDIO ENGINE ---
+        // Generates pleasant procedural heart sounds based on BPM
         const AudioEngine = {
             ctx: null,
-            beatOsc: null,
-            breathGain: null,
-            heartInterval: null,
-            isActive: false,
+            nextNoteTime: 0.0,
+            timerID: null,
+            bpm: 80,
+            isPlaying: false,
 
             init: function() {
                 if (!this.ctx) {
@@ -821,119 +793,122 @@
 
             toggle: function() {
                 this.init();
-                this.isActive = !this.isActive;
+                if (this.ctx.state === 'suspended') this.ctx.resume();
                 
-                if(this.isActive) { 
-                    // Browser policy requires resume() after user gesture
-                    if(this.ctx.state === 'suspended') {
-                        this.ctx.resume();
+                this.isPlaying = !this.isPlaying;
+                
+                if (this.isPlaying) {
+                    this.nextNoteTime = this.ctx.currentTime + 0.1;
+                    this.scheduler();
+                } else {
+                    window.clearTimeout(this.timerID);
+                }
+                return this.isPlaying;
+            },
+
+            setBPM: function(newBpm) {
+                this.bpm = newBpm;
+            },
+
+            scheduleHeartbeat: function(time) {
+                // "LUB" Sound (Low, Thud)
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                const filter1 = this.ctx.createBiquadFilter();
+
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(60, time);
+                osc1.frequency.exponentialRampToValueAtTime(40, time + 0.1);
+
+                filter1.type = 'lowpass';
+                filter1.frequency.value = 180;
+
+                // Envelope
+                gain1.gain.setValueAtTime(0, time);
+                gain1.gain.linearRampToValueAtTime(0.8, time + 0.02);
+                gain1.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+
+                osc1.connect(filter1);
+                filter1.connect(gain1);
+                gain1.connect(this.ctx.destination);
+
+                osc1.start(time);
+                osc1.stop(time + 0.2);
+
+                // "DUB" Sound (Slightly higher, sharper)
+                const t2 = time + 0.25; // Delay for Dub
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                const filter2 = this.ctx.createBiquadFilter();
+
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(80, t2);
+                osc2.frequency.exponentialRampToValueAtTime(50, t2 + 0.1);
+
+                filter2.type = 'lowpass';
+                filter2.frequency.value = 250;
+
+                gain2.gain.setValueAtTime(0, t2);
+                gain2.gain.linearRampToValueAtTime(0.6, t2 + 0.02);
+                gain2.gain.exponentialRampToValueAtTime(0.001, t2 + 0.15);
+
+                osc2.connect(filter2);
+                filter2.connect(gain2);
+                gain2.connect(this.ctx.destination);
+
+                osc2.start(t2);
+                osc2.stop(t2 + 0.2);
+            },
+
+            scheduler: function() {
+                while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+                    if(activeOrgan === 'heart') {
+                        this.scheduleHeartbeat(this.nextNoteTime);
                     }
-                    this.startOrganSound(activeOrgan);
-                } else {
-                    this.stopAll();
+                    // Add logic for other organ sounds if needed (breathing for lungs)
+                    
+                    const secondsPerBeat = 60.0 / this.bpm;
+                    this.nextNoteTime += secondsPerBeat;
                 }
-                return this.isActive;
-            },
-
-            playHeartbeat: function(bpm) {
-                if (!this.isActive) return;
-                const interval = 60000 / bpm;
-                
-                if(this.heartInterval) clearInterval(this.heartInterval);
-
-                const playThump = (timeOffset, freq, decay) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.value = freq;
-                    // Slightly louder gain for better audibility
-                    gain.gain.setValueAtTime(0.8, this.ctx.currentTime + timeOffset);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + timeOffset + decay);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(this.ctx.currentTime + timeOffset);
-                    osc.stop(this.ctx.currentTime + timeOffset + decay + 0.1);
-                };
-
-                const loop = () => {
-                    playThump(0, 60, 0.15); // Lub
-                    playThump(0.2, 50, 0.25); // Dub
-                };
-                
-                loop(); 
-                this.heartInterval = setInterval(loop, interval);
-            },
-
-            playBreathing: function() {
-                if (!this.isActive) return;
-                const bufferSize = this.ctx.sampleRate * 2; 
-                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-                const noise = this.ctx.createBufferSource();
-                noise.buffer = buffer;
-                noise.loop = true;
-
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.Q.value = 1;
-
-                this.breathGain = this.ctx.createGain();
-                this.breathGain.gain.value = 0;
-
-                noise.connect(filter);
-                filter.connect(this.breathGain);
-                this.breathGain.connect(this.ctx.destination);
-                noise.start();
-
-                const lfo = this.ctx.createOscillator();
-                lfo.type = 'sine';
-                lfo.frequency.value = 0.2; 
-                const lfoGain = this.ctx.createGain();
-                lfoGain.gain.value = 400; 
-                
-                lfo.connect(lfoGain);
-                lfoGain.connect(filter.frequency);
-                filter.frequency.value = 500; 
-                lfo.start();
-
-                // Audibility check: Increased gain
-                this.breathGain.gain.setTargetAtTime(0.25, this.ctx.currentTime, 1);
-            },
-
-            stopAll: function() {
-                if(this.heartInterval) clearInterval(this.heartInterval);
-                if(this.breathGain) {
-                    this.breathGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.5);
-                    setTimeout(() => { if(this.breathGain) try { this.breathGain.disconnect(); } catch(e){} }, 500);
-                }
-            },
-
-            startOrganSound: function(organ) {
-                this.stopAll();
-                if(organ === 'heart') {
-                    const bpm = ORGAN_DATA.heart.simValue || 80;
-                    this.playHeartbeat(bpm);
-                } else {
-                    this.playBreathing();
-                }
-            },
-            
-            updateHeartRate(bpm) {
-                if(this.isActive && activeOrgan === 'heart') {
-                    this.playHeartbeat(bpm);
-                }
+                this.timerID = window.setTimeout(this.scheduler.bind(this), 25);
             }
         };
 
         // --- DASHBOARD LOGIC ---
+        const generateOrganButtons = () => {
+            const tray = document.querySelector('.organ-tray'); // Updated target
+            tray.innerHTML = '';
+            
+            Object.keys(ORGAN_DATA).forEach(key => {
+                const data = ORGAN_DATA[key];
+                const btn = document.createElement('div');
+                btn.className = `organ-item ${key === 'heart' ? 'selected' : ''}`;
+                btn.dataset.organ = key;
+                
+                // Logic to use custom SVG if available, else fallback to Phosphor icon class
+                let iconHtml = '';
+                if (data.icon.startsWith('svg-')) {
+                    const svgKey = data.icon.split('-')[1];
+                    iconHtml = ORGAN_SVGS[svgKey] || '<i class="ph ph-warning"></i>'; // Fallback
+                } else {
+                    iconHtml = `<i class="ph ${data.icon}"></i>`;
+                }
+
+                btn.innerHTML = `
+                    ${iconHtml}
+                    <span class="organ-name-mini">${key.toUpperCase()}</span>
+                    ${key === 'heart' ? '<div class="organ-label">My Heart</div>' : ''}
+                `;
+                tray.appendChild(btn);
+            });
+        };
+
         const updateUI = (organType) => {
             activeOrgan = organType;
             const data = ORGAN_DATA[organType];
             
-            // Audio Switch
-            AudioEngine.startOrganSound(organType);
+            // Audio Sync
+            AudioEngine.setBPM(data.simValue);
 
             // Text Updates
             document.getElementById('section-title').innerHTML = `<div class="blue-dot"></div> ${data.title}`;
@@ -977,8 +952,7 @@
 
                 if(ORGAN_DATA[activeOrgan].animKey === type) {
                     ORGAN_DATA[activeOrgan].simValue = val;
-                    // Update audio bpm live
-                    if(activeOrgan === 'heart') AudioEngine.updateHeartRate(val);
+                    if(activeOrgan === 'heart') AudioEngine.setBPM(val);
                 }
             }
         };
@@ -991,6 +965,8 @@
             const mainInt = setInterval(() => {
                 let hasAlert = false;
                 data.stats.forEach((s, i) => {
+                    if (typeof s.base === 'string') return; // Skip text based stats
+
                     let val = parseFloat(s.base);
                     let flux = (Math.random() - 0.5) * (val * 0.15); 
                     if(Math.random() > 0.85) flux *= 2.5; 
@@ -1019,12 +995,12 @@
             liveIntervals.push(mainInt);
         };
 
-        // --- THREE.JS ENGINE (BIO-SYNC) ---
+        // --- THREE.JS ENGINE ---
         let scene, camera, renderer, group, particles;
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let mouseX = 0, mouseY = 0;
-        let spotLight, fillLight;
+        let spotLight;
 
         const initThree = () => {
             const container = document.getElementById('model-3d-container');
@@ -1068,11 +1044,10 @@
             scene.add(spotLight);
             
             const rimLight = new THREE.PointLight(0xff0055, 3, 50); rimLight.position.set(-10, 5, -5); scene.add(rimLight);
-            fillLight = new THREE.PointLight(0x3b82f6, 1, 50); fillLight.position.set(10, -10, 10); scene.add(fillLight);
+            const fillLight = new THREE.PointLight(0x3b82f6, 1, 50); fillLight.position.set(10, -10, 10); scene.add(fillLight);
 
             loadOrganModel('heart');
-            updateUI('heart');
-
+            
             // --- ANIMATION LOOP ---
             const clock = new THREE.Clock();
             const animate = () => {
@@ -1084,9 +1059,8 @@
                     const type = group.userData.type;
                     
                     if (type === 'heart') {
-                        // Advanced Heart Beat Animation
+                        // Heart Animation
                         const speed = simVal / 60; 
-                        // Complex beat wave: contraction, relaxation, pause
                         const beat = Math.sin(t * speed * Math.PI * 2);
                         const scale = beat > 0.8 ? 1 + (beat-0.8)*0.4 : 1;
                         
@@ -1097,6 +1071,7 @@
                         spotLight.intensity = 2 + (scale - 1) * 8; 
 
                     } else if (type === 'cells') {
+                        // Cells Animation
                         group.rotation.z -= 0.002;
                         group.rotation.y += 0.002;
                         group.children.forEach((c, i) => {
@@ -1105,12 +1080,10 @@
                         });
                     }
                     else {
-                        // Fallback loaded model animation (breathing/pulse)
-                        // This handles loaded GLBs generically
-                        const speed = (simVal / 60) || 0.5;
-                        const pulse = 1 + Math.sin(t * speed * Math.PI) * 0.02;
-                        group.scale.set(pulse, pulse, pulse);
-                        group.rotation.y += 0.002;
+                        // Imported Model Animation (Generic Rotation/Pulse)
+                        group.rotation.y += 0.005;
+                        const pulse = 1 + Math.sin(t * 2) * 0.01;
+                        group.scale.set(pulse * 2, pulse * 2, pulse * 2); // Scale up imported models slightly
                     }
                 }
                 
@@ -1119,7 +1092,7 @@
             };
             animate();
 
-            // INPUT
+            // INPUT HANDLERS
             container.addEventListener('mousemove', (e) => {
                 const rect = container.getBoundingClientRect();
                 mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -1149,27 +1122,30 @@
             group.userData.type = type;
             scene.add(group);
 
-            // Re-use materials from previous code for procedural parts
-            const organMaterial = new THREE.MeshPhysicalMaterial({ color: 0x660000, roughness: 0.2, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1, reflectivity: 1 });
-            const arteryMaterial = new THREE.MeshPhysicalMaterial({ color: 0x881111, roughness: 0.4, metalness: 0.0, clearcoat: 0.3 });
-
+            // 1. HEART (Procedural)
             if (type === 'heart') {
-                // ... existing heart procedural code ...
+                const organMaterial = new THREE.MeshPhysicalMaterial({ color: 0x660000, roughness: 0.2, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1, reflectivity: 1 });
+                const arteryMaterial = new THREE.MeshPhysicalMaterial({ color: 0x881111, roughness: 0.4, metalness: 0.0, clearcoat: 0.3 });
+                
                 const lvGeo = new THREE.SphereGeometry(3, 32, 32); lvGeo.scale(0.9, 1.4, 0.9);
                 const leftVentricle = new THREE.Mesh(lvGeo, organMaterial); leftVentricle.position.set(0.5, -1, 0); leftVentricle.rotation.z = -0.2; group.add(leftVentricle);
+                
                 const rvGeo = new THREE.SphereGeometry(2.6, 32, 32); rvGeo.scale(1, 1.3, 0.8);
                 const rightVentricle = new THREE.Mesh(rvGeo, organMaterial); rightVentricle.position.set(-1.5, -0.5, 0.5); rightVentricle.rotation.z = 0.2; group.add(rightVentricle);
+                
                 const laGeo = new THREE.SphereGeometry(1.8, 24, 24); const leftAtrium = new THREE.Mesh(laGeo, organMaterial); leftAtrium.position.set(1.5, 2, -0.5); group.add(leftAtrium);
                 const raGeo = new THREE.SphereGeometry(1.9, 24, 24); const rightAtrium = new THREE.Mesh(raGeo, organMaterial); rightAtrium.position.set(-2, 1.5, 0); group.add(rightAtrium);
+                
                 const aortaGeo = new THREE.TorusGeometry(2, 0.8, 16, 32, 2.5); const aorta = new THREE.Mesh(aortaGeo, arteryMaterial); aorta.position.set(0.5, 3.5, 0); aorta.rotation.z = 2.5; aorta.rotation.y = 0.5; group.add(aorta);
-                const paGeo = new THREE.CylinderGeometry(0.9, 0.9, 3, 16); const pulmArtery = new THREE.Mesh(paGeo, arteryMaterial); pulmArtery.position.set(-0.5, 3, 1); pulmArtery.rotation.z = -0.3; pulmArtery.rotation.x = 0.3; group.add(pulmArtery);
+                
                 new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
             } 
+            // 2. CELLS (Procedural)
             else if (type === 'cells') {
-                // ... existing cells procedural code ...
                 const rbcMat = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, roughness: 0.4, metalness: 0.1, clearcoat: 0.5 });
                 const rbcGeo = new THREE.TorusGeometry(0.6, 0.2, 16, 32);
                 const centerGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32); centerGeo.rotateX(Math.PI/2);
+                
                 for(let i=0; i<15; i++) {
                     const cellGroup = new THREE.Group();
                     const rim = new THREE.Mesh(rbcGeo, rbcMat);
@@ -1180,39 +1156,49 @@
                     cellGroup.scale.setScalar(0.5 + Math.random()*0.5);
                     group.add(cellGroup);
                 }
-                const wbcMat = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.8});
-                const wbcGeo = new THREE.IcosahedronGeometry(0.8, 1);
-                for(let i=0; i<3; i++) {
-                    const wbc = new THREE.Mesh(wbcGeo, wbcMat);
-                    wbc.position.set((Math.random()-0.5)*8, (Math.random()-0.5)*8, (Math.random()-0.5)*5);
-                    group.add(wbc);
-                }
             } 
+            // 3. EXTERNAL GLB LOADER
             else {
-                // GLB Loader logic
                 const loader = new THREE.GLTFLoader();
-                loader.load(`3D/${type}.glb`, (gltf) => {
+                const url = `${GITHUB_REPO_PATH}${type}.glb`;
+                
+                loader.load(url, (gltf) => {
                     const model = gltf.scene;
                     const box = new THREE.Box3().setFromObject(model);
                     const size = box.getSize(new THREE.Vector3()).length();
                     const center = box.getCenter(new THREE.Vector3());
-                    const scaleFactor = 4 / size;
+                    
+                    // Normalize Size
+                    const scaleFactor = 6 / size;
                     model.scale.setScalar(scaleFactor);
+                    
+                    // Center it
                     model.position.x += (model.position.x - center.x) * scaleFactor;
                     model.position.y += (model.position.y - center.y) * scaleFactor;
                     model.position.z += (model.position.z - center.z) * scaleFactor;
+                    
                     group.add(model);
                 }, undefined, (error) => {
-                    console.warn('Could not load GLB, falling back to placeholder', error);
-                    const placeholderMat = new THREE.MeshPhysicalMaterial({ color: 0xaaaaaa, wireframe: true, transparent: true, opacity: 0.3 });
-                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 32, 32), placeholderMat);
-                    group.add(sphere);
+                    // FALLBACK: If model fails to load, show a placeholder wireframe shape
+                    console.warn(`Failed to load ${type}.glb from ${url}. Using fallback.`, error);
+                    
+                    const geo = new THREE.IcosahedronGeometry(2.5, 1);
+                    const mat = new THREE.MeshStandardMaterial({ 
+                        color: 0x0A84FF, 
+                        wireframe: true, 
+                        transparent: true, 
+                        opacity: 0.5 
+                    });
+                    const fallbackMesh = new THREE.Mesh(geo, mat);
+                    group.add(fallbackMesh);
                 });
             }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            generateOrganButtons();
             initThree();
+            updateUI('heart');
 
             // Sound Toggle
             const soundBtn = document.getElementById('sound-toggle');
@@ -1222,26 +1208,24 @@
                 soundBtn.style.background = isActive ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
             });
 
-            document.querySelectorAll('.organ-item').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.organ-item').forEach(b => b.classList.remove('selected'));
-                    
-                    document.querySelectorAll('.organ-label, .arrow-box').forEach(el => el.remove());
-                    
-                    btn.classList.add('selected');
-                    
-                    const label = document.createElement('div'); label.className = 'organ-label'; 
-                    label.innerText = 'My ' + btn.dataset.organ.charAt(0).toUpperCase() + btn.dataset.organ.slice(1);
-                    btn.appendChild(label);
-                    
-                    const arrow = document.createElement('div'); arrow.className = 'arrow-box'; 
-                    arrow.innerHTML = '<i class="ph-bold ph-arrow-up-right"></i>';
-                    btn.appendChild(arrow);
-                    
-                    const organ = btn.dataset.organ;
-                    loadOrganModel(organ);
-                    updateUI(organ);
-                });
+            // Delegate events for dynamically created buttons
+            const tray = document.querySelector('.organ-tray');
+            tray.addEventListener('click', (e) => {
+                const btn = e.target.closest('.organ-item');
+                if(!btn) return;
+                
+                document.querySelectorAll('.organ-item').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.organ-label').forEach(el => el.remove());
+                
+                btn.classList.add('selected');
+                
+                const label = document.createElement('div'); label.className = 'organ-label'; 
+                label.innerText = 'My ' + btn.dataset.organ.charAt(0).toUpperCase() + btn.dataset.organ.slice(1);
+                btn.appendChild(label);
+                
+                const organ = btn.dataset.organ;
+                loadOrganModel(organ);
+                updateUI(organ);
             });
         });
     </script>
