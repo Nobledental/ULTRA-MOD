@@ -531,10 +531,9 @@
     
     <script>
         // --- CONFIGURATION ---
-        // UPDATE THIS PATH to your GitHub repo's raw content folder for 3d models
-        // Example: 'https://raw.githubusercontent.com/YourName/YourRepo/main/3d_models/'
-        // The loader will look for: GITHUB_REPO_PATH + organName + '.glb'
-        const GITHUB_REPO_PATH = 'https://github.com/Nobledental/ULTRA-MOD/tree/main/3d_models'; 
+        // UPDATE: Switched to jsDelivr CDN. This is much more stable than raw.githubusercontent.com
+        // for loading 3D models in production apps.
+        const GITHUB_REPO_PATH = 'https://cdn.jsdelivr.net/gh/Nobledental/ULTRA-MOD@main/3d_models/'; 
         
         // --- CUSTOM SVG ICONS FOR ORGANS ---
         const ORGAN_SVGS = {
