@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Health flo OS - NEO (Bio-Sync Enabled)</title>
     
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- GLTF Loader for external models -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     
     <style>
@@ -391,7 +387,6 @@
 <body>
 
     <div class="app-container">
-        <!-- Browser Bar -->
         <div class="browser-bar">
             <div class="window-controls">
                 <div class="window-dot" style="background: #ef4444;"></div>
@@ -404,7 +399,6 @@
         </div>
 
         <div class="dashboard-body">
-            <!-- Sidebar -->
             <div class="sidebar">
                 <div class="logo">H<span>+</span></div>
                 <div class="menu-item active"><i class="ph-fill ph-heartbeat"></i></div>
@@ -415,10 +409,8 @@
                 <div class="menu-item" style="margin-top: auto; color: #ef4444;"><i class="ph ph-power"></i></div>
             </div>
 
-            <!-- Content -->
             <div class="main-content">
                 
-                <!-- Header -->
                 <div class="header-section">
                     <div class="header-left">
                         <div class="top-toggles">
@@ -432,7 +424,6 @@
                     </div>
                 </div>
 
-                <!-- 3D Stage -->
                 <div class="heart-stage">
                     <div class="sound-btn" id="sound-toggle"><i class="ph-fill ph-speaker-simple-high"></i></div>
                     <div class="rings"></div>
@@ -450,11 +441,9 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="stats-area">
                     <div class="section-header"><div class="blue-dot"></div> <span id="section-title">My Heart Condition</span></div>
                     <div class="cards-grid">
-                        <!-- Card 1 -->
                         <div class="data-card state-blue" id="card-1">
                             <div class="card-head">
                                 <div><span class="card-title" id="c1-title">Blood Status</span><span class="card-val" id="c1-val">116/70</span></div>
@@ -464,7 +453,6 @@
                                 <div class="bar" style="height:40%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:50%"></div><div class="bar act" style="height:90%"></div><div class="bar act" style="height:60%"></div><div class="bar" style="height:40%"></div>
                             </div>
                         </div>
-                        <!-- Card 2 -->
                         <div class="data-card active-blue" id="card-2">
                             <div class="card-head">
                                 <div><span class="card-title" id="c2-title">Heart Rate</span><span class="card-val" id="c2-val">120 <span style="font-size:14px; font-weight:500;">bpm</span></span></div>
@@ -473,7 +461,6 @@
                             <svg width="100%" height="50" style="margin-top:auto; opacity:0.8; overflow:visible;"><path id="card-wave-path" d="M0,25 Q10,25 15,10 T30,25 T45,40 T60,10 T75,25 T100,25" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/></svg>
                             <div class="blue-square-val"><span style="font-size:16px; font-weight:800;" id="box-bpm">120</span></div>
                         </div>
-                        <!-- Card 3 -->
                         <div class="data-card state-blue" id="card-3">
                             <div class="card-head">
                                 <div><span class="card-title" id="c3-title">Blood Count</span><span class="card-val" id="c3-val">80-90</span></div>
@@ -481,7 +468,6 @@
                             </div>
                             <svg width="100%" height="40" style="margin-top:auto;"><path d="M0,20 Q25,5 50,20 T100,20" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round"/><circle cx="80" cy="20" r="4" fill="#3b82f6" /></svg>
                         </div>
-                        <!-- Card 4 -->
                         <div class="data-card state-blue" id="card-4">
                             <div class="card-head">
                                 <div><span class="card-title" id="c4-title">Glucose Level</span><span class="card-val" id="c4-val">230<small style="font-size:12px; color:#6b7280;">/ml</small></span></div>
@@ -492,19 +478,14 @@
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN (Organs + Schedule) -->
                 <div class="right-column">
-                    <!-- 1. ORGAN ICONS TRAY -->
                     <div class="section-header"><div class="blue-dot"></div> Select Organ</div>
                     <div class="organ-tray">
-                        <!-- Populated by JS -->
-                    </div>
+                        </div>
 
-                    <!-- 2. SCHEDULE AREA -->
                     <div class="schedule-area">
                         <div class="section-header" style="margin-bottom:10px;"><div class="blue-dot"></div> AI Analysis</div>
                         
-                        <!-- AI Suggestion Box (Dynamic) -->
                         <div class="ai-panel" id="ai-panel">
                             <span class="ai-title" id="ai-title">AI ANALYSIS</span>
                             <p class="ai-text" id="ai-text">Patient vitals are stable. All organ functions within normal range. Monitoring active.</p>
@@ -1108,7 +1089,7 @@
                     const type = group.userData.type;
                     
                     if (type === 'heart') {
-                        // Heart Animation
+                        // Heart Animation (Scaling for heartbeat effect)
                         const speed = simVal / 60; 
                         const beat = Math.sin(t * speed * Math.PI * 2);
                         const scale = beat > 0.8 ? 1 + (beat-0.8)*0.4 : 1;
@@ -1118,21 +1099,11 @@
                         group.rotation.x = Math.cos(t * 0.3) * 0.05 + (mouseY * 0.2);
                         
                         spotLight.intensity = 2 + (scale - 1) * 8; 
-
-                    } else if (type === 'cells') {
-                        // Cells Animation
-                        group.rotation.z -= 0.002;
-                        group.rotation.y += 0.002;
-                        group.children.forEach((c, i) => {
-                           c.position.y += Math.sin(t * 1 + i) * 0.005;
-                           c.rotation.x += 0.01;
-                        });
-                    }
-                    else {
-                        // Imported Model Animation (Generic Rotation/Pulse)
+                    } else {
+                        // All Other Imported Models (Generic Rotation/Pulse)
                         group.rotation.y += 0.005;
                         const pulse = 1 + Math.sin(t * 2) * 0.01;
-                        group.scale.set(pulse * 2, pulse * 2, pulse * 2); // Scale up imported models slightly
+                        group.scale.set(pulse * 2, pulse * 2, pulse * 2); 
                     }
                 }
                 
@@ -1171,77 +1142,40 @@
             group.userData.type = type;
             scene.add(group);
 
-            // 1. HEART (Procedural)
-            if (type === 'heart') {
-                const organMaterial = new THREE.MeshPhysicalMaterial({ color: 0x660000, roughness: 0.2, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1, reflectivity: 1 });
-                const arteryMaterial = new THREE.MeshPhysicalMaterial({ color: 0x881111, roughness: 0.4, metalness: 0.0, clearcoat: 0.3 });
+            // UNIFIED LOADER: Now loads external GLB for ALL types (including heart and cells)
+            const loader = new THREE.GLTFLoader();
+            const url = `${GITHUB_REPO_PATH}${type}.glb`;
+            
+            loader.load(url, (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3()).length();
+                const center = box.getCenter(new THREE.Vector3());
                 
-                const lvGeo = new THREE.SphereGeometry(3, 32, 32); lvGeo.scale(0.9, 1.4, 0.9);
-                const leftVentricle = new THREE.Mesh(lvGeo, organMaterial); leftVentricle.position.set(0.5, -1, 0); leftVentricle.rotation.z = -0.2; group.add(leftVentricle);
+                // Normalize Size
+                const scaleFactor = 6 / size;
+                model.scale.setScalar(scaleFactor);
                 
-                const rvGeo = new THREE.SphereGeometry(2.6, 32, 32); rvGeo.scale(1, 1.3, 0.8);
-                const rightVentricle = new THREE.Mesh(rvGeo, organMaterial); rightVentricle.position.set(-1.5, -0.5, 0.5); rightVentricle.rotation.z = 0.2; group.add(rightVentricle);
+                // Center it
+                model.position.x += (model.position.x - center.x) * scaleFactor;
+                model.position.y += (model.position.y - center.y) * scaleFactor;
+                model.position.z += (model.position.z - center.z) * scaleFactor;
                 
-                const laGeo = new THREE.SphereGeometry(1.8, 24, 24); const leftAtrium = new THREE.Mesh(laGeo, organMaterial); leftAtrium.position.set(1.5, 2, -0.5); group.add(leftAtrium);
-                const raGeo = new THREE.SphereGeometry(1.9, 24, 24); const rightAtrium = new THREE.Mesh(raGeo, organMaterial); rightAtrium.position.set(-2, 1.5, 0); group.add(rightAtrium);
+                group.add(model);
+            }, undefined, (error) => {
+                // FALLBACK: If model fails to load, show a placeholder wireframe shape
+                console.warn(`Failed to load ${type}.glb from ${url}. Using fallback.`, error);
                 
-                const aortaGeo = new THREE.TorusGeometry(2, 0.8, 16, 32, 2.5); const aorta = new THREE.Mesh(aortaGeo, arteryMaterial); aorta.position.set(0.5, 3.5, 0); aorta.rotation.z = 2.5; aorta.rotation.y = 0.5; group.add(aorta);
-                
-                new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
-            } 
-            // 2. CELLS (Procedural)
-            else if (type === 'cells') {
-                const rbcMat = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, roughness: 0.4, metalness: 0.1, clearcoat: 0.5 });
-                const rbcGeo = new THREE.TorusGeometry(0.6, 0.2, 16, 32);
-                const centerGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32); centerGeo.rotateX(Math.PI/2);
-                
-                for(let i=0; i<15; i++) {
-                    const cellGroup = new THREE.Group();
-                    const rim = new THREE.Mesh(rbcGeo, rbcMat);
-                    const center = new THREE.Mesh(centerGeo, rbcMat); center.scale.set(0.9, 1, 0.9);
-                    cellGroup.add(rim, center);
-                    cellGroup.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*10, (Math.random()-0.5)*5);
-                    cellGroup.rotation.set(Math.random()*3, Math.random()*3, 0);
-                    cellGroup.scale.setScalar(0.5 + Math.random()*0.5);
-                    group.add(cellGroup);
-                }
-            } 
-            // 3. EXTERNAL GLB LOADER
-            else {
-                const loader = new THREE.GLTFLoader();
-                const url = `${GITHUB_REPO_PATH}${type}.glb`;
-                
-                loader.load(url, (gltf) => {
-                    const model = gltf.scene;
-                    const box = new THREE.Box3().setFromObject(model);
-                    const size = box.getSize(new THREE.Vector3()).length();
-                    const center = box.getCenter(new THREE.Vector3());
-                    
-                    // Normalize Size
-                    const scaleFactor = 6 / size;
-                    model.scale.setScalar(scaleFactor);
-                    
-                    // Center it
-                    model.position.x += (model.position.x - center.x) * scaleFactor;
-                    model.position.y += (model.position.y - center.y) * scaleFactor;
-                    model.position.z += (model.position.z - center.z) * scaleFactor;
-                    
-                    group.add(model);
-                }, undefined, (error) => {
-                    // FALLBACK: If model fails to load, show a placeholder wireframe shape
-                    console.warn(`Failed to load ${type}.glb from ${url}. Using fallback.`, error);
-                    
-                    const geo = new THREE.IcosahedronGeometry(2.5, 1);
-                    const mat = new THREE.MeshStandardMaterial({ 
-                        color: 0x0A84FF, 
-                        wireframe: true, 
-                        transparent: true, 
-                        opacity: 0.5 
-                    });
-                    const fallbackMesh = new THREE.Mesh(geo, mat);
-                    group.add(fallbackMesh);
+                const geo = new THREE.IcosahedronGeometry(2.5, 1);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: 0x0A84FF, 
+                    wireframe: true, 
+                    transparent: true, 
+                    opacity: 0.5 
                 });
-            }
+                const fallbackMesh = new THREE.Mesh(geo, mat);
+                group.add(fallbackMesh);
+            });
         };
 
         document.addEventListener('DOMContentLoaded', () => {
